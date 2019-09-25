@@ -1,0 +1,9 @@
+#!/bin/bash
+
+rm -r build*
+mkdir build
+mkdir build/vtu
+cd build
+cmake ..
+make
+time ./main

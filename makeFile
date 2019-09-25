@@ -1,0 +1,15 @@
+#!/bin/bash
+
+g++ -c src/functions/*.cpp
+g++ -c src/geometry/structuredHexMesh.cpp
+g++ -c src/geometry/octreeSHM.cpp
+g++ -c src/logs/*.cpp
+g++ -c src/materials/*.cpp
+g++ -c src/maths/*.cpp
+g++ -c src/phase/*.cpp
+g++ -c main.cpp
+
+g++ -std=c++11 -o main main.o setfun.o structuredHexMesh.o octreeSHM.o log.o eos.o gas.o vec3.o vec3operations.o phase.o
+rm *.o
+
+time ./main

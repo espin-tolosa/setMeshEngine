@@ -1,0 +1,23 @@
+#!/usr/bin/gnuplot -persist
+set xrange [-2:2]
+set yrange [-2:2]
+set zrange [-5:5]
+set xlabel 'x-axis'
+set ylabel 'y-axis'
+set zlabel 'ts: 99/6'
+set grid
+set hidden3d
+set term png
+set style line 1 lc rgb "gray"
+set style line 2 lc rgb "red"
+set view 0, 0, 1, 1
+set object 1 rectangle from screen 0,0 to screen 1,1 fillcolor rgb"gray"
+set output "printem.199.png"
+splot 'temp/data.msh'using 1:2:3 lc 1,\
+      'temp/cell.msh'using 1:2:3 notitle lc 1 with lines,\
+      'temp/oct1.msh'using 1:2:3 notitle lc 2 with lines,\
+      'temp/oct2.msh'using 1:2:3 notitle lc 2 with lines,\
+      'temp/oct3.msh'using 1:2:3 notitle lc 2 with lines,\
+      'temp/oct4.msh'using 1:2:3 notitle lc 2 with lines,\
+      'temp/xpC8.msh'using 1:2:3 notitle lc 2 with lines
+
