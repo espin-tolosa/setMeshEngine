@@ -1,15 +1,21 @@
 #ifndef OCTREESHM_H_INCLUDED
 #define OCTREESHM_H_INCLUDED
 
-#include "structuredHexMesh.h"
 
 class octreeSHM : public structuredHexMesh
 {
+	private:
+	unsigned* vTable;
+
 	public:
 
-    	void loadVertexId(const unsigned& id) override;
+	octreeSHM();
+	~octreeSHM();
+
+   	void loadVertexId(const unsigned& id) override;
 	void setHexMeshElement(structuredHexMesh& leveli);
 	void setHexMeshElement(octreeSHM& leveli);
+	void arrayInnerCompareTwo(const int Array[], const int& sizeArray);
 	//	void setOctreeLevel1(vec3 Qt[], int Divisions);
 };
 

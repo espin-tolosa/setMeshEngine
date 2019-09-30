@@ -47,13 +47,20 @@ Tengo dos grandes lios. El primero tengo que optimizar el paso de datos a funcio
 Tengo que ver como pasar la clase hijo structuredHexMesh la del padre para que coja los vertices de las celdas que le interesen
 Tengo que ver como se ordena la malla del hijo en las conexiones.El esquema de SweepFace no sirve, aqui cada celda tiene vertex exclusivos
 ...........................................................................................................................................[NEWDAY]
+26/09/2019 [UNION DE RAMAS 14 y 16]
 ...........................................................................................................................................[STATUS]
+Tengo el archivo structuredMesh.h que no se muy bien porque lo cree o si lo puedo borrar.
+Lo mismo me pasa con vec3operations. que yo creo que lo cree con la idea de independizar las operaciones de las entitades pero a medias
 
 ...........................................................................................................................................[HOWFIX]
 ...........................................................................................................................................[NEWDAY]
+28/09/2019 [REV]
 ...........................................................................................................................................[STATUS]
-
+After review src/materials library I've decided to avoid modify it until finish the mesh desing and memory allocation of variables
+The point is, depending on how I will organize and store cells will determine the rest of variables associated to this cells
 ...........................................................................................................................................[HOWFIX]
+The way to fix this is finish structuredHexMesh and octreeSHM
+
 ...........................................................................................................................................[NEWDAY]
 ...........................................................................................................................................[STATUS]
 

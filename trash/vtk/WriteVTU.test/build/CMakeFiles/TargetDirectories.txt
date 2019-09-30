@@ -1,3 +1,0 @@
-/home/samuel_espintolosa/setMeshEngine/v13/vtk/WriteVTU.test/build/CMakeFiles/rebuild_cache.dir
-/home/samuel_espintolosa/setMeshEngine/v13/vtk/WriteVTU.test/build/CMakeFiles/WriteVTU.dir
-/home/samuel_espintolosa/setMeshEngine/v13/vtk/WriteVTU.test/build/CMakeFiles/edit_cache.dir

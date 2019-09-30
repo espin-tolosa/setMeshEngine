@@ -1,6 +1,4 @@
-#include <iostream>
-
-#include "../maths/vec3operations.h"
+#include "vec3operations.h"
 
 float vec3operations::Dot(const vec3& A, const vec3& B)
     {

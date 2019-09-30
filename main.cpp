@@ -1,9 +1,7 @@
 #include "lib/lib.h"
-#include <new>
+
 //#include <vtkXMLUnstructuredGrid.h>
 //#include <GL/glew.h>
-
-using namespace std;
 
 int main()
 {
@@ -11,194 +9,285 @@ int main()
 	float VIEW_ROTX = 0;
 	float VIEW_ROTZ = 0;
 
+	int NEL = 2;
 	int t=0;
-	int tfin = 100;
-
-	int NEL = 10000;
-	vec3 cubeMeshSurface[] =
-	{
-		vec3(0.0f , 0.0f, 0.0f),
-		vec3(0.75f, 0.0f, 0.0f),
-		vec3(1.25f, 0.0f, 0.0f),
-		vec3(2.0f , 0.0f, 0.0f),
-
-		vec3(0.0f , 0.0f, 1.0f),
-		vec3(0.75f, 0.0f, 1.0f),
-		vec3(1.25f, 0.0f, 1.0f),
-		vec3(2.0f , 0.0f, 1.0f),
-
-		vec3(0.0f , 0.0f, 2.0f),
-		vec3(0.75f, 0.0f, 2.0f),
-		vec3(1.25f, 0.0f, 2.0f),
-		vec3(2.0f , 0.0f, 2.0f),
-
-		vec3(0.0f , 0.0f, 3.0f),
-		vec3(0.75f, 0.0f, 3.0f),
-		vec3(1.25f, 0.0f, 3.0f),
-		vec3(2.0f , 0.0f, 3.0f)
-	};
-
-	for(int i = 0; i<4*4; i++)
-	{
-		cubeMeshSurface[i].Add(vec3(0.25,0.0,0.0));
-	}
+	int tfin = 100000;
 
 	structuredHexMesh MyCube;
-	MyCube.SweepFace(cubeMeshSurface, 4, 4, NEL, PI/(float) NEL, vec3(0.0,0.0,0.0));
-	MyCube.DisplaceMesh(vec3(0.,-1.5,-1.5));
-
-	for(int i=0; i<(int)MyCube.Log_Cells_Max(); i++)
+	//Defining the mesh-surface that will be extruded later
+	//with SweepFace to create a 3D hexaedral structured-mesh
 	{
-		MyCube.loadVertexId((unsigned) i);
-		MyCube.CenterC8();
-	}
+		vec3 cubeMeshSurface[] {
+			vec3(0.0 , 0.0, 0.0),
+			vec3(20.75, 0.0, 0.0),
+			vec3(50.25, 0.0, 0.0),
+			vec3(100.0 , 0.0, 0.0),
 
-	while(t<tfin)
-	{
+			vec3(0.0 , 0.0, 1.0),
+			vec3(20.75, 0.0, 1.0),
+			vec3(50.25, 0.0, 1.0),
+			vec3(100.0 , 0.0, 1.0),
 
-	//[Info] Updating position of points insertion
-	int number_of_points = 14;
-	vec3 point[number_of_points]
-	{
-		vec3(0.3, 1.8, 1.1),
-		vec3( -1.8 , -2.0+0.01*(float)t , 0.5-0.01*(float)t ),
-		vec3( -1.5 , -2.0+0.01*(float)t , 0.7-0.01*(float)t ),
-		vec3( -1.2 , -2.0+0.01*(float)t , 0.5-0.01*(float)t ),
+			vec3(0.0 , 0.0, 2.0),
+			vec3(20.75, 0.0, 2.0),
+			vec3(50.25, 0.0, 2.0),
+			vec3(100.0 , 0.0, 2.0),
 
-		vec3( -0.9 , -2.0+0.01*(float)t , 0.5-0.01*(float)t ),
-		vec3( -0.6 , -2.0+0.01*(float)t , 0.7-0.01*(float)t ),
-		vec3( -0.3 , -2.0+0.01*(float)t , 0.5-0.01*(float)t ),
+			vec3(0.0 , 0.0, 3.0),
+			vec3(20.75, 0.0, 3.0),
+			vec3(50.25, 0.0, 3.0),
+			vec3(100.0 , 0.0, 3.0)
+		};
 
-		vec3(  0.0 , -2.0+0.01*(float)t , 0.5-0.01*(float)t ),
+		for(int i=0; i< sizeof(cubeMeshSurface)/sizeof(vec3); i++) {
 
-		vec3(  0.3 , -2.0+0.01*(float)t , 0.5-0.01*(float)t ),
-		vec3(  0.6 , -2.0+0.01*(float)t , 0.7-0.01*(float)t ),
-		vec3(  0.9 , -2.0+0.01*(float)t , 0.5-0.01*(float)t ),
+			cubeMeshSurface[i].Add(vec3(0.25,0.0,0.0));
+		}
 
-		vec3(  1.2 , -2.0+0.01*(float)t , 0.5-0.01*(float)t ),
-		vec3(  1.5 , -2.0+0.01*(float)t , 0.7-0.01*(float)t ),
-		vec3(  1.8 , -2.0+0.01*(float)t , 0.5-0.01*(float)t )
+		MyCube.SweepFace(cubeMeshSurface, 4, 4, NEL, PI/(float) NEL, vec3(0.0,0.0,0.0));
+		MyCube.DisplaceMesh(vec3(0.,-1.5,-1.5));
+
+		//This command compute cell centers of all cells for the mesh
+		for(int i=0; i< (int)MyCube.Log_Cells_Max(); i++) {
+
+			MyCube.loadVertexId((unsigned) i);
+			MyCube.CenterC8();
+		}
+	} //end of scope of 2D mesh-surface: cubeMeshSurface 
+
+	//Defining an cloud of points to test the octree algorithm
+	vec3 points[] {
+		vec3(  0.3 ,  1.8 , 1.1  ),
+		vec3( -1.8 , -2.0 , 0.51 ),
+		vec3( -1.5 , -2.0 , 0.71 ),
+		vec3( -1.2 , -2.0 , 0.5  ),
+
+		vec3( -0.9 , -2.0 , 0.5  ),
+		vec3( -0.6 , -2.0 , 0.7  ),
+		vec3( -0.3 , -2.0 , 0.5  ),
+
+		vec3(  0.0 , -2.0 , 0.5  ),
+
+		vec3(  0.3 , -2.0 , 0.5  ),
+		vec3(  0.6 , -2.0 , 0.7  ),
+		vec3(  0.9 , -2.0 , 0.5  ),
+
+		vec3(  1.2 , -2.0 , 0.5  ),
+		vec3(  1.5 , -2.0 , 0.7  ),
+		vec3(  1.8 , -2.0 , 0.5  ),
+
+		vec3(  0.0 , 0.0 , 0.0   ),
+		vec3( -1.8 , 2.0 , 0.5   ),
+		vec3( -1.5 , 2.0 , 0.7   ),
+		vec3( -1.2 , 2.0 , 0.5   ),
+
+		vec3( -0.9 , 2.0 , 0.5   ),
+		vec3( -0.6 , 2.0 , 0.7   ),
+		vec3( -0.3 , 2.0 , 0.5   ),
+
+		vec3(  0.0 , 2.0 , 0.5   ),
+
+		vec3(  0.3 , 2.0 , 0.5   ),
+		vec3(  0.6 , 2.0 , 0.7   ),
+		vec3(  0.9 , 2.0 , 0.5   ),
+
+		vec3(  1.2 , 2.0 , 0.5   ),
+		vec3(  1.5 , 2.0 , 0.7   ),
+		vec3(  1.8 , 2.0 , 0.5   )
+
 	};
+
+	int number_of_points = sizeof(points)/sizeof(vec3);
+
+	//Main loop to run the algorithm. It takes the cloud of points and compute
+	//what cell of the mesh they belong to slit this cell in octree recursively
+	while(t++<tfin)
+	{
+
+		//[Info] Updating position of points insertion
+		for(int i = 0;  i< number_of_points; i++) {
+
+			points[i].Add(vec3(0.005, 0.0, 0.0));
+		}
+
+		//[Info] Reset to false all entries of subdivions before recompute the insertion points in next step
+		if(MyCube.Total_Cell_Divided) {
+
+			MyCube.Total_Cell_Divided = 0;
+			for(int i=0; (unsigned) i<MyCube.Log_Cells_Max(); i++) {
 	
-	//[Info] Reset to false all entries of subdivions before recompute the insertion points in next step
-	for(int i=0; (unsigned) i<MyCube.Log_Cells_Max(); i++)
-	{
-		*(MyCube.Cell_Divided+i) = false;
-	}
-	MyCube.Total_Cell_Divided = 0;
-	//[Info] Buscando en MyCube los puntos insertados	
-	for(int k=0; k<(int)MyCube.Log_Cells_Max(); k++)
-	{
-		MyCube.loadVertexId((unsigned) k);
-
-		for(int j=0; j<number_of_points; j++)
-		{
-			if(!MyCube.Cell_Divided[k])
-			{
-			MyCube.vertexSearchCell(point[j]);
+				*(MyCube.Cell_Divided+i) = false;
 			}
 		}
-	}
 
-if(MyCube.Total_Cell_Divided>0)
-{
-	//[Info] Creando el Octree del primer nivel
-	octreeSHM* Octree1 = new octreeSHM;
-	Octree1->setHexMeshElement(MyCube);
-	//[Info] Buscando en Octree1 los puntos insertados
-	for(int k=0; k<(int)Octree1->Log_Cells_Max(); k++)
-	{
-		Octree1->loadVertexId((unsigned) k);
-		Octree1->CenterC8();
-		for(int j=0; j<number_of_points; j++)
-		{
-			if(!Octree1->Cell_Divided[k])
-			{
-			Octree1->vertexSearchCell(point[j]);
+		//[Info] Buscando en MyCube los puntos insertados	
+		for(int k=0; k<(int)MyCube.Log_Cells_Max(); k++) {
+
+			MyCube.loadVertexId((unsigned) k);
+			for(int j=0; j<number_of_points; j++) {
+				//if the cell is not yet divided enters in search function to check if a  point is there
+				if(!MyCube.Cell_Divided[k]) {
+			
+					MyCube.vertexSearchCell(points[j]);
+				}
 			}
 		}
-	}
 
-if(Octree1->Total_Cell_Divided>0)
-{
-	//[Info] Creando el Octree del segundo nivel
-	octreeSHM* Octree2 = new octreeSHM;
-	Octree2->setHexMeshElement(*Octree1);
-	//[Info] Buscando en Octree1 los puntos insertados
-	for(int k=0; k<(int)Octree2->Log_Cells_Max(); k++)
-	{
-		Octree2->loadVertexId((unsigned) k);
-		Octree2->CenterC8();
-		for(int j=0; j<number_of_points; j++)
-		{
-			if(!Octree2->Cell_Divided[k])
-			{
-			Octree2->vertexSearchCell(point[j]);
+		
+		//[Info] Craeting Octree level 1
+		if(MyCube.Total_Cell_Divided) {
+		octreeSHM* Octree_1 = new octreeSHM;
+		Octree_1->setHexMeshElement(MyCube);
+		//[Info] Buscando en Octree1 los puntos insertados
+		for(int k=0; k<(int)Octree_1->Log_Cells_Max(); k++) {
+			Octree_1->loadVertexId((unsigned) k);
+			Octree_1->CenterC8();
+			for(int j=0; j<number_of_points; j++) {
+				if(!Octree_1->Cell_Divided[k]) {
+				Octree_1->vertexSearchCell(points[j]);
+				}
 			}
 		}
-	}
 
-if(Octree2->Total_Cell_Divided>0)
-{
-	//[Info] Creando el Octree del tercer nivel
-	octreeSHM* Octree3 = new octreeSHM;
-	Octree3->setHexMeshElement(*Octree2);
-	//[Info] Buscando en Octree3 los puntos insertados
-	for(int k=0; k<(int)Octree3->Log_Cells_Max(); k++)
-	{
-		Octree3->loadVertexId((unsigned) k);
-		Octree3->CenterC8();
-		for(int j=0; j<number_of_points; j++)
-		{
-			if(!Octree3->Cell_Divided[k])
-			{
-			Octree3->vertexSearchCell(point[j]);
+		//[Info] Creating Octree level 2
+		if(Octree_1->Total_Cell_Divided) {
+		octreeSHM* Octree_2 = new octreeSHM;
+		Octree_2->setHexMeshElement(*Octree_1);
+		//[Info] Buscando en Octree1 los puntos insertados
+		for(int k=0; k<(int)Octree_2->Log_Cells_Max(); k++) {
+			Octree_2->loadVertexId((unsigned) k);
+			Octree_2->CenterC8();
+			for(int j=0; j<number_of_points; j++) {
+				if(!Octree_2->Cell_Divided[k]) {
+					Octree_2->vertexSearchCell(points[j]);
+				}
 			}
 		}
-	}
 
-if(Octree3->Total_Cell_Divided>0)
-{
-	//[Info] Creando el Octree del cuarto nivel
-	octreeSHM* Octree4 = new octreeSHM;
-	Octree4->setHexMeshElement(*Octree3);
-	//[Info] Buscando en Octree3 los puntos insertados
-	for(int k=0; k<(int)Octree4->Log_Cells_Max(); k++)
-	{
-		Octree4->loadVertexId((unsigned) k);
-		Octree4->CenterC8();
-		for(int j=0; j<number_of_points; j++)
-		{
-			if(!Octree4->Cell_Divided[k])
-			{
-			Octree4->vertexSearchCell(point[j]);
+		//[Info] Creating el Octree level 3
+		if(Octree_2->Total_Cell_Divided) {
+		octreeSHM* Octree_3 = new octreeSHM;
+		Octree_3->setHexMeshElement(*Octree_2);
+		//[Info] Buscando en Octree1 los puntos insertados
+		for(int k=0; k<(int)Octree_3->Log_Cells_Max(); k++) {
+			Octree_3->loadVertexId((unsigned) k);
+			Octree_3->CenterC8();
+			for(int j=0; j<number_of_points; j++) {
+				if(!Octree_3->Cell_Divided[k]) {
+					Octree_3->vertexSearchCell(points[j]);
+				}
 			}
 		}
-	}
+
+		//[Info] Creating el Octree level 4
+		if(Octree_3->Total_Cell_Divided) {
+		octreeSHM* Octree_4 = new octreeSHM;
+		Octree_4->setHexMeshElement(*Octree_3);
+		//[Info] Buscando en Octree1 los puntos insertados
+		for(int k=0; k<(int)Octree_4->Log_Cells_Max(); k++) {
+			Octree_4->loadVertexId((unsigned) k);
+			Octree_4->CenterC8();
+			for(int j=0; j<number_of_points; j++) {
+				if(!Octree_4->Cell_Divided[k]) {
+					Octree_4->vertexSearchCell(points[j]);
+				}
+			}
+		}
+
+
+
+		//[Info] Creating el Octree level 5
+		if(Octree_4->Total_Cell_Divided) {
+		octreeSHM* Octree_5 = new octreeSHM;
+		Octree_5->setHexMeshElement(*Octree_4);
+		//[Info] Buscando en Octree1 los puntos insertados
+		for(int k=0; k<(int)Octree_5->Log_Cells_Max(); k++) {
+			Octree_5->loadVertexId((unsigned) k);
+			Octree_5->CenterC8();
+			for(int j=0; j<number_of_points; j++) {
+				if(!Octree_5->Cell_Divided[k]) {
+					Octree_5->vertexSearchCell(points[j]);
+				}
+			}
+		}
+
+		//[Info] Creating el Octree level 6
+		if(Octree_5->Total_Cell_Divided) {
+		octreeSHM* Octree_6 = new octreeSHM;
+		Octree_6->setHexMeshElement(*Octree_5);
+		//[Info] Buscando en Octree1 los puntos insertados
+		for(int k=0; k<(int)Octree_4->Log_Cells_Max(); k++) {
+			Octree_6->loadVertexId((unsigned) k);
+			Octree_6->CenterC8();
+			for(int j=0; j<number_of_points; j++) {
+				if(!Octree_6->Cell_Divided[k]) {
+					Octree_6->vertexSearchCell(points[j]);
+				}
+			}
+		}
+
+		//[Info] Creating el Octree level 7
+		if(Octree_6->Total_Cell_Divided) {
+		octreeSHM* Octree_7 = new octreeSHM;
+		Octree_7->setHexMeshElement(*Octree_6);
+		//[Info] Buscando en Octree1 los puntos insertados
+		for(int k=0; k<(int)Octree_7->Log_Cells_Max(); k++) {
+			Octree_7->loadVertexId((unsigned) k);
+			Octree_7->CenterC8();
+			for(int j=0; j<number_of_points; j++) {
+				if(!Octree_7->Cell_Divided[k]) {
+					Octree_7->vertexSearchCell(points[j]);
+				}
+			}
+		}
+
+
+		int cells_added = Octree_1 -> Log_Cells_Max() +
+				  Octree_2 -> Log_Cells_Max() +
+				  Octree_3 -> Log_Cells_Max() +
+				  Octree_4 -> Log_Cells_Max() +
+				  Octree_5 -> Log_Cells_Max() +
+				  Octree_6 -> Log_Cells_Max() +
+				  Octree_7 -> Log_Cells_Max() ;
+
+		std::cout<<"[INFO] Cells Added: " << cells_added << "/" << MyCube.Log_Cells_Max()
+				 <<                  " (" <<100.0*(float)cells_added/(float)MyCube.Log_Cells_Max() << ")%" << std::endl;
 	//[Info] Output to GNUPLOT
 //	#include "lib/gnuplot.h" //sudo apt-get install gnuplot
 //	system("sed -i -e 's/\r$//' temp/gnu.data"); 
 //	system("chmod +x temp/gnu.data");
 //	system("./temp/gnu.data");
 
-//	std::cout<<"DELETING OCTREES 4"<<std::endl;
-	delete Octree4;
+
+//	std::cout<<"DELETING OCTREES 7: "<< Octree_7->Log_Cells_Max() << std::endl;
+	delete Octree_7;
 }
 
-//	std::cout<<"DELETING OCTREES 3"<<std::endl;
-	delete Octree3;
+//	std::cout<<"DELETING OCTREES 6: "<< Octree_6->Log_Cells_Max() << std::endl;
+	delete Octree_6;
 }
 
-//	std::cout<<"DELETING OCTREES 2"<<std::endl;
-	delete Octree2;
+//	std::cout<<"DELETING OCTREES 5: "<< Octree_5->Log_Cells_Max() << std::endl;
+	delete Octree_5;
 }
 
-//	std::cout<<"DELETING OCTREES 1"<<std::endl;
-	delete Octree1;
+//	std::cout<<"DELETING OCTREES 4: "<< Octree_4->Log_Cells_Max() << std::endl;
+	delete Octree_4;
+}
+
+//	std::cout<<"DELETING OCTREES 3: "<< Octree_3->Log_Cells_Max() << std::endl;
+	delete Octree_3;
+}
+
+//	std::cout<<"DELETING OCTREES 2: "<< Octree_2->Log_Cells_Max() << std::endl;
+	delete Octree_2;
+}
+//	std::cout<<"DELETING OCTREES 1: "<< Octree_1->Log_Cells_Max() << std::endl;
+	delete Octree_1;
 }
 
 	std::cout<<"TIME-STAMP: "<<t<<std::endl;
-t++;
+//	t++;
 //	VIEW_ROTZ += 1;
 
 //	MyCube.RotateYMesh(0.02f);

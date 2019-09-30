@@ -2,16 +2,16 @@
 #include "phase.h"
 
 phase::phase()
-    : name("UNKNOWN"), eos() {}
+    : name("UNKNOWN"), gas() {}
 
 phase::phase(char* name_phase, gas& v)
-    : eos(v), name(name_phase) {}
+    : gas(v), name(name_phase) {}
 
 void phase::Log()
 {
     std::cout<<"------------------------------------"<<std::endl;
     std::cout<<"Name:                     "<<name<<std::endl;
-    std::cout<<"Density:                  "<<rho<<std::endl;
+    std::cout<<"Density:                  "<<r<<std::endl;
     std::cout<<"Temperature:              "<<T<<std::endl;
     std::cout<<"Pressure:                 "<<p<<std::endl;
     std::cout<<"Adiabatic rate expansion: "<<gamma<<std::endl;

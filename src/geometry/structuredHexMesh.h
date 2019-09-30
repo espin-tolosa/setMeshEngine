@@ -1,8 +1,6 @@
 #ifndef STRUCTUREDHEXMESH_H_INCLUDED
 #define STRUCTUREDHEXMESH_H_INCLUDED
 
-#include <iostream>
-#include <math.h>
 #include "../maths/vectors.h"
 
 class structuredHexMesh : public vec3
@@ -17,8 +15,8 @@ class structuredHexMesh : public vec3
     unsigned m_Face_Population;
     unsigned m_Volume_Population;
 
-    long double m_Total_Volume;
-    long double m_cell_Volume;
+    double m_Total_Volume;
+    double m_cell_Volume;
 
     public:
 
@@ -28,6 +26,11 @@ class structuredHexMesh : public vec3
     vec3* Face_UNormals;
     vec3* Face_Centroids;
 
+    double* u;
+    double* r;
+    double* T;
+    double* p;
+
     vec3* Vertex[8];
     vec3* Edge_i[12]; //        int id_vert[] = {0,2, 1,3, 2,5, 1,6, 5,7, 4,6, 7,0, 4,3, 0,5, 4,1, 2,7, 6,3 }
     vec3* Edge_j[12];
@@ -36,7 +39,7 @@ class structuredHexMesh : public vec3
 
     int Total_Cell_Divided;
 
-     structuredHexMesh();
+    structuredHexMesh();
 //     structuredHexMesh(const unsigned H, const unsigned W, const unsigned L, const unsigned count_mesh, const unsigned  count_faces, const unsigned count_volumes);
     ~structuredHexMesh();
 
@@ -48,18 +51,18 @@ class structuredHexMesh : public vec3
 
     void loadCellEdges();        //Pass global *Mesh.Vertex -> Vertex & Edge_ij
 
-    long double AreaC3(const vec3& p1, const vec3& p2, const vec3& p3);
+    double AreaC3(const vec3& p1, const vec3& p2, const vec3& p3);
 //    float AreaC4(const vec3& v0, const vec3& v1, const vec3& v2, const vec3& v3);
     vec3 CenterC3(const vec3& p1, const vec3& p2, const vec3& p3);
     vec3 CenterC4(const vec3& p1, const vec3& p2, const vec3& p3, const vec3& p4);
     vec3 CenterT4(const vec3& v0, const vec3& v1, const vec3& v2, const vec3& v3);
-    long double VolumeT4(const vec3& v0, const vec3& v1, const vec3& v2, const vec3& v3);
+    double VolumeT4(const vec3& v0, const vec3& v1, const vec3& v2, const vec3& v3);
     void CenterC8();
 
     void setOctreeLevel1(vec3 Qt[], int Divisions);
     void setOctreeLevel2(vec3 Qt[], int Divisions);
 
-    void SweepFace(const vec3 MeshSurface[],const int& c_Xwide, const int& c_Zheight, const int& c_Ysweep, const long double& sweepValue, const vec3& origin);
+    void SweepFace(const vec3 MeshSurface[],const int& c_Xwide, const int& c_Zheight, const int& c_Ysweep, const double& sweepValue, const vec3& origin);
 
     virtual void loadVertexId(const unsigned& id);
     bool vertexSearchCell(const vec3& point);

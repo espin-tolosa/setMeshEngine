@@ -75,13 +75,13 @@ bool sign_of_int(const int &signed_var)
 {
     if(getBit(signed_var,7))
     {
-        std::cout<<"negative\n";
+//        std::cout<<"negative\n";
         return true;
     }
 
     else
     {
-        std::cout<<"positive\n";
+//        std::cout<<"positive\n";
         return false;
     }
 }

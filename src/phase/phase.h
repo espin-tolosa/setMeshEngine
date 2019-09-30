@@ -3,9 +3,9 @@
 
 #include <string>
 
-#include "../materials/eos.h"
+#include "../materials/gas.h"
 
-class phase : public eos
+class phase : public gas
 {
     std::string name;
 
@@ -16,5 +16,4 @@ class phase : public eos
 
     void Log();
 };
-
 #endif // PHASE_H_INCLUDED

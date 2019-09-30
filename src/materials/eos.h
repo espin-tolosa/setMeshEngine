@@ -1,9 +1,7 @@
 #ifndef EOS_H_INCLUDED
 #define EOS_H_INCLUDED
 
-#include "gas.h"
-
-class eos : public gas
+class eos
 {
     public:
 

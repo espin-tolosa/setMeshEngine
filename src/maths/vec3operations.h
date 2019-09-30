@@ -1,7 +1,7 @@
 #ifndef VEC3OPERATIONS_H_INCLUDED
 #define VEC3OPERATIONS_H_INCLUDED
 
-#include "../maths/vec3.h"
+#include "vec3.h"
 
 class vec3operations
 {
