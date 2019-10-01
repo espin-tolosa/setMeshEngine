@@ -11,7 +11,7 @@ int main()
 
 	int NEL = 2;
 	int t=0;
-	int tfin = 100000;
+	int tfin = 1000;
 
 	structuredHexMesh MyCube;
 	//Defining the mesh-surface that will be extruded later
@@ -105,10 +105,9 @@ int main()
 	{
 
 		//[Info] Updating position of points insertion
-		for(int i = 0;  i< number_of_points; i++) {
+		int iop = 0; //{iop = 0 (Add); iop = 1 (Substract)} //this line will remove after suit documentation
+		points[0].ForEach(points, number_of_points, vec3(1.5, 0.0, 0.0), 0);
 
-			points[i].Add(vec3(0.005, 0.0, 0.0));
-		}
 
 		//[Info] Reset to false all entries of subdivions before recompute the insertion points in next step
 		if(MyCube.Total_Cell_Divided) {
@@ -250,8 +249,8 @@ int main()
 				  Octree_6 -> Log_Cells_Max() +
 				  Octree_7 -> Log_Cells_Max() ;
 
-		std::cout<<"[INFO] Cells Added: " << cells_added << "/" << MyCube.Log_Cells_Max()
-				 <<                  " (" <<100.0*(float)cells_added/(float)MyCube.Log_Cells_Max() << ")%" << std::endl;
+//		std::cout<<"[INFO] Cells Added: " << cells_added << "/" << MyCube.Log_Cells_Max()
+//				 <<                  " (" <<100.0*(float)cells_added/(float)MyCube.Log_Cells_Max() << ")%" << std::endl;
 	//[Info] Output to GNUPLOT
 //	#include "lib/gnuplot.h" //sudo apt-get install gnuplot
 //	system("sed -i -e 's/\r$//' temp/gnu.data"); 
@@ -286,7 +285,7 @@ int main()
 	delete Octree_1;
 }
 
-	std::cout<<"TIME-STAMP: "<<t<<std::endl;
+	std::cout<<"TIME-STAMP: "<<t<<"/"<<tfin<<std::endl;
 //	t++;
 //	VIEW_ROTZ += 1;
 

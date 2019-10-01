@@ -51,7 +51,10 @@ struct vec3
     //Create a vertex between 3Dline Xi-Xj as: X(sigma(0:1))->|Xi:Xj|
     vec3 Line(const vec3& Xi, const vec3& Xj, double sigma);
 
-    friend std::ostream& operator<<(std::ostream& stream, const vec3& vector);
+	//Pointer functions to run over arrays elements of vec3 type
+	void ForEach(vec3* array, const int& size_array, const vec3& other,  int method_type);
+
+	friend std::ostream& operator<<(std::ostream& stream, const vec3& vector);
 
 //Multiplation overloading
     vec3 friend operator*(const double& a, const vec3& b)

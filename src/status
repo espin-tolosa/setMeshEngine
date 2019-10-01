@@ -33,10 +33,9 @@ Documentar que pasa en caso del colapso de una cara, a la hora de calcular las n
 He creado un algoritmo tipo Octree de refinamiento de malla, funciona bien pero sin optimizar y solo para un bloque
 ...........................................................................................................................................[HOWFIX]
 Tengo que hacer lo mismo para todos los puntos necesarios, contar los bloques que se van a refinar y meterlos todos en un nivel de malla
-Tengo un problema con el archivo main.cpp, se ha quedado un temporal de vim dando el follon
+Esto sera arreglado implementando un sistema de referencias para recorrer el arbol
 
-
-
+SOLVED: - Tengo un problema con el archivo main.cpp, se ha quedado un temporal de vim dando el follon
 
 ...........................................................................................................................................[NEWDAY]
 12/06/2019 [PREV]: 08
@@ -62,9 +61,12 @@ The point is, depending on how I will organize and store cells will determine th
 The way to fix this is finish structuredHexMesh and octreeSHM
 
 ...........................................................................................................................................[NEWDAY]
+01/10/2019
 ...........................................................................................................................................[STATUS]
-
+Added function pointer to a method in vec3 class of kind: ForEach_Array_vec3_Element(Add=0, Substract=1)
 ...........................................................................................................................................[HOWFIX]
+OK
+
 ...........................................................................................................................................[NEWDAY]
 ...........................................................................................................................................[STATUS]
 

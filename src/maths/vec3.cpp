@@ -12,9 +12,9 @@ vec3::vec3(const double& x, const double& y, const double& z)
 
 void vec3::Add(const vec3& other)
     {
-	x += other.x;
-        y += other.y;
-        z += other.z;
+		this->x += other.x;
+    	this->y += other.y;
+    	this->z += other.z;
     }
 
 void vec3::Add(const float& other)
@@ -33,9 +33,9 @@ void vec3::Add(const double& other)
 
 void vec3::Substract(const vec3& other)
     {
-        x -= other.x;
-        y -= other.y;
-        z -= other.z;
+        this->x -= other.x;
+        this->y -= other.y;
+        this->z -= other.z;
     }
 
 void vec3::Substract(const float& other)
@@ -152,6 +152,18 @@ double vec3::Norma(const vec3& other)
 
 vec3 vec3::Line(const vec3& Xi, const vec3& Xj, double sigma)
     {return vec3(sigma*Xj.x + (1-sigma)*Xi.x, sigma*Xj.y + (1-sigma)*Xi.y, sigma*Xj.z + (1-sigma)*Xi.z);}
+
+void vec3::ForEach(vec3* array, const int& size_array, const vec3& other,  int method_type)
+{//stackoverflow.com/questions/31708302/function-pointer-array-to-a-method-within-a-class
+	typedef void (vec3::*method_function)(const vec3&);
+	method_function method_pointer[2] = {&vec3::Add, &vec3::Substract};
+	method_function function = method_pointer[method_type];
+//	int number_of_elements = sizeof(entity_array)/isizeof(vec3);
+	for(int i = 0;  i< size_array; i++)
+	{
+		((array + i)->*function)(other);
+	}
+}
 
 std::ostream& operator<<(std::ostream& stream, const vec3& vector)
     {
