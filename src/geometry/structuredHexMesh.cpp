@@ -462,15 +462,15 @@ void structuredHexMesh::Log() const
 
 void structuredHexMesh::Log_Cells() const
 {
-	std::cout<<"Vertex Coordinates of Node: "<< m_id << std::endl;
-	std::cout<<"v0: "<<*Vertex[0]<<std::endl;
-	std::cout<<"v1: "<<*Vertex[1]<<std::endl;
-	std::cout<<"v2: "<<*Vertex[2]<<std::endl;
-	std::cout<<"v3: "<<*Vertex[3]<<std::endl;
-	std::cout<<"v4: "<<*Vertex[4]<<std::endl;
-	std::cout<<"v5: "<<*Vertex[5]<<std::endl;
-	std::cout<<"v6: "<<*Vertex[6]<<std::endl;
-	std::cout<<"v7: "<<*Vertex[7]<<std::endl;
+//	std::cout<<"Vertex Coordinates of Node: "<< m_id << std::endl;
+	std::cout<<*Vertex[0]<<std::endl;
+	std::cout<<*Vertex[1]<<std::endl;
+	std::cout<<*Vertex[2]<<std::endl;
+	std::cout<<*Vertex[3]<<std::endl;
+	std::cout<<*Vertex[4]<<std::endl;
+	std::cout<<*Vertex[5]<<std::endl;
+	std::cout<<*Vertex[6]<<std::endl;
+	std::cout<<*Vertex[7]<<std::endl;
 }
 
 unsigned structuredHexMesh::Log_Cells_Max() const
@@ -481,6 +481,40 @@ unsigned structuredHexMesh::Log_Cells_Max() const
 unsigned structuredHexMesh::Log_Verts() const
 {
     return m_Vertex_Population;
+}
+
+
+void structuredHexMesh::WriteMesh()
+//void structuredHexMesh::WriteMesh(std::ofstream meshFileOF, std::string nameFile)
+{
+
+	std::ofstream meshFileOF;
+	std::string nameFile = "temp/meshIO.csv";
+	meshFileOF.open(nameFile.c_str());
+
+	if(meshFileOF.is_open())
+	{
+		for(int i = 0; i<this->Log_Verts(); i++)
+		{
+			meshFileOF << this->Mesh[i]<<std::endl;
+		}
+
+
+	/*	for(unsigned k=0; k < this->Log_Cells_Max(); k++) {
+			this->loadVertexId(k);
+			meshFileOF		<< *Vertex[0]<<"\n"
+						<< *Vertex[1]<<"\n"
+						<< *Vertex[2]<<"\n"
+						<< *Vertex[3]<<"\n"
+						<< *Vertex[4]<<"\n"
+						<< *Vertex[5]<<"\n"
+						<< *Vertex[6]<<"\n"
+						<< *Vertex[7]<<"\n";
+		}
+	*/
+		meshFileOF.close();
+	}
+
 }
 
 //////////////////////////////////////////////////////////////////////////////

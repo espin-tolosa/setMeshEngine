@@ -1,6 +1,10 @@
 #ifndef STRUCTUREDHEXMESH_H_INCLUDED
 #define STRUCTUREDHEXMESH_H_INCLUDED
 
+
+#include <string.h>
+#include <fstream>
+
 #include "../maths/vectors.h"
 
 class structuredHexMesh : public vec3
@@ -72,7 +76,8 @@ class structuredHexMesh : public vec3
     unsigned Log_Cells_Max() const;
     unsigned Log_Verts() const;
 
-
+	void WriteMesh();
+//	void WriteMesh(std::ofstream meshFileOF, std::string nameFile);
 
 };
 
