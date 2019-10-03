@@ -52,7 +52,7 @@
 
 structuredHexMesh::structuredHexMesh()
 
-    :   m_H(0), m_W(0), m_L(0),
+    :   m_H(0), m_W(0), m_L(0), m_HW(0),
         m_Vertex_Population(0), m_Face_Population(0), m_Volume_Population(0), m_id(0),
         m_Total_Volume(0.0), m_cell_Volume(0.0),
         Mesh(), Cell_Centroids(), Cell_Divided(), Vertex(), Edge_i(), Edge_j(), Tris(), Quad(),
@@ -355,9 +355,8 @@ void structuredHexMesh::SweepFace(const vec3 MeshSurface[], const int& c_Xwide, 
     {
     if(Mesh==0)
     {
-        m_H = c_Zheight;
-        m_W = c_Xwide;
-       // m_id = (m_H-1)*(m_W-1)*c_Ysweep;
+        m_H= c_Zheight; m_W= c_Xwide; m_HW= m_H*m_W;
+ 		// m_id = (m_H-1)*(m_W-1)*c_Ysweep;
 
         m_Vertex_Population = (c_Ysweep+1)*m_H*m_W;
         m_Volume_Population = (m_H-1)*(m_W-1)*c_Ysweep;
@@ -393,57 +392,50 @@ void structuredHexMesh::SweepFace(const vec3 MeshSurface[], const int& c_Xwide, 
     }
     }
 
-bool structuredHexMesh::vertexSearchCell(const vec3 &point)
+bool structuredHexMesh::vertexSearchCell(const vec3& point)
 {
 	double dotCheck;
-	for (int i=0; i<6 ;i++)
+	for (int i=0; i<6 ;i++) //It will placed here ForEach
 	{
-		dotCheck = vec3::Dot(vec3::Glob2Loc(point, Face_Centroids[m_id*6 + i]), Face_UNormals[m_id*6 + i]);
-		if(dotCheck>0.0)
+		if(vec3::Dot(vec3::Glob2Loc(point, Face_Centroids[m_id*6 + i]), Face_UNormals[m_id*6 + i]) > 0.000001)
 		{
 			return false;
-		//	return (unsigned int) NULL;
 		}
 	}
+
 	this->Cell_Divided[m_id] = true;
 	this->Total_Cell_Divided++;
+//	std::cout<<"Dividiendo Celda: "<<Total_Cell_Divided<<std::endl;
 	return true;
 }
 
-void structuredHexMesh::loadVertexId(const unsigned &id)
-{
-    	if(id<m_Volume_Population)
+
+//	HW________________Count vertex in a layer
+//	(H-1)(W-1)________Count elements in a layer
+//	id/(W-1)__________Adds the last vertex of the row |-0-|-1-|-2-|-3-(|) <-this 
+//	id/(H-1)(W-1)_____Adds the top row of vertex-W
+
+void structuredHexMesh::loadVertexId(const unsigned &id) {
+
+	if(id<m_Volume_Population)
     {
-    	m_id = id; //ESTO TENGO QUE ARREGLARLO: OTRAS FUNCIONES DEPENDEN DE QUE ESTA SEA LLAMADA PRIMERO PARA PODER USAR m_id
-        int HW = m_H*m_W;                       //Count vertex in a layer
-        int count_Cells_layer = (m_H-1)*(m_W-1);//Count elements in a layer
+    	m_id = id;
+		int i = m_id + (m_id/(m_W-1)) + (m_id/((m_W-1)*(m_H-1)))*m_W;
 
-        int count_rows_passed = 0;              //Adds the last vertex of the row |-0-|-1-|-2-|-3-(|) <-this
-        int count_layers_passed = 0;            //Adds the top row of vertex-W
-
-        count_rows_passed = id/(m_W-1);
-        count_layers_passed = id/count_Cells_layer;
-
-	int i = id + count_rows_passed + count_layers_passed * m_W ;
-
-	//Mapp of local vertex enum		global possition XYZ in a dimensional global frame reference
-	//ESTE TAMBIEN HAY QUE ARREGLARLO PORQUE ESTE MAPEADO SOLO SIRVE PARA LA MALLA DE LEVEL0 LOS DEMAS LEVEL TIENEN OTRO MAPEADO
-	this->Vertex[0] = &Mesh[i];		//(0 0 0)
-        this->Vertex[1] = &Mesh[i+1];		//(1 0 0)
-        this->Vertex[2] = &Mesh[i+1+m_W];	//(1 0 1)
-        this->Vertex[3] = &Mesh[i+m_W];		//(0 0 1)
-
-        this->Vertex[4] = &Mesh[i+HW];		//(0 1 0)
-        this->Vertex[5] = &Mesh[i+1+HW];	//(1 1 0)
-        this->Vertex[6] = &Mesh[i+1+m_W+HW];	//(1 1 1)
-        this->Vertex[7] = &Mesh[i+m_W+HW];	//(0 1 1)
-	//OBS: los centroides no estan optimizados y de momento no comparten info asi el indice no hay que procesarlo como para los vertex
+		//ESTE TAMBIEN HAY QUE ARREGLARLO PORQUE ESTE MAPEADO SOLO SIRVE PARA LA MALLA DE LEVEL0 LOS DEMAS LEVEL TIENEN OTRO MAPEADO
+		this->Vertex[0] = &Mesh[i];				//(0 0 0)
+ 		this->Vertex[1] = &Mesh[i+1];			//(1 0 0)
+		this->Vertex[2] = &Mesh[i+1+m_W];		//(1 0 1)
+		this->Vertex[3] = &Mesh[i+m_W];			//(0 0 1)
+		this->Vertex[4] = &Mesh[i+m_HW];			//(0 1 0)
+		this->Vertex[5] = &Mesh[i+1+m_HW];		//(1 1 0)
+		this->Vertex[6] = &Mesh[i+1+m_W+m_HW];	//(1 1 1)
+		this->Vertex[7] = &Mesh[i+m_W+m_HW];		//(0 1 1)
+		//OBS: los centroides no estan optimiz y de momento no comparten info asi el indice no hay que procesarlo como para los vertex
     }
     
-    else
-    {
-	std::cout<<"[ERROR] ID out of bound"<<std::endl;
-    }
+    else{std::cout<<"[ERROR] ID out of bound in MESH"<<std::endl;}
+
 }
 
 void structuredHexMesh::Log() const
@@ -484,19 +476,19 @@ unsigned structuredHexMesh::Log_Verts() const
 }
 
 
-void structuredHexMesh::WriteMesh()
-//void structuredHexMesh::WriteMesh(std::ofstream meshFileOF, std::string nameFile)
+//void structuredHexMesh::WriteMesh(std::string nameFile)
+void structuredHexMesh::WriteMesh(std::ofstream *meshFileOF, std::string nameFile, int level)
 {
 
-	std::ofstream meshFileOF;
-	std::string nameFile = "temp/meshIO.csv";
-	meshFileOF.open(nameFile.c_str());
+//	std::ofstream meshFileOF;
+//	std::string nameFile = "temp/meshIO.csv";
+	meshFileOF->open(nameFile.c_str(), std::ios::app);
 
-	if(meshFileOF.is_open())
+	if(meshFileOF->is_open())
 	{
 		for(int i = 0; i<this->Log_Verts(); i++)
 		{
-			meshFileOF << this->Mesh[i]<<std::endl;
+			*meshFileOF << this->Mesh[i]<<", "<<level<<std::endl;
 		}
 
 
@@ -512,7 +504,7 @@ void structuredHexMesh::WriteMesh()
 						<< *Vertex[7]<<"\n";
 		}
 	*/
-		meshFileOF.close();
+		meshFileOF->close();
 	}
 
 }

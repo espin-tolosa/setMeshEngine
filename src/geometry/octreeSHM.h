@@ -13,6 +13,7 @@ class octreeSHM : public structuredHexMesh
 	~octreeSHM();
 
    	void loadVertexId(const unsigned& id) override;
+   	void loadVertexId(const unsigned& id, int octreeLevel);
 	void setHexMeshElement(structuredHexMesh& leveli);
 	void setHexMeshElement(octreeSHM& leveli);
 	void arrayInnerCompareTwo(const int Array[], const int& sizeArray);

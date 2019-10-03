@@ -14,6 +14,7 @@ class structuredHexMesh : public vec3
     unsigned m_H;
     unsigned m_W;
     unsigned m_L;
+	unsigned m_HW;
     unsigned m_id;
     unsigned m_Vertex_Population;
     unsigned m_Face_Population;
@@ -76,8 +77,8 @@ class structuredHexMesh : public vec3
     unsigned Log_Cells_Max() const;
     unsigned Log_Verts() const;
 
-	void WriteMesh();
-//	void WriteMesh(std::ofstream meshFileOF, std::string nameFile);
+//	void WriteMesh(std::string nameFile);
+	void WriteMesh(std::ofstream *meshFileOF, std::string nameFile, int level);
 
 };
 

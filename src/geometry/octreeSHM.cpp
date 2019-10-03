@@ -6,9 +6,10 @@ octreeSHM::octreeSHM() {
 
 //	std::cout<<"\n[CONSTRUCTOR]: Octree Mesh"<<std::endl;
 
-	m_H = 3;
-	m_W = 3;
-	m_L = 3;
+	m_H  = 3;
+	m_W  = 3;
+	m_L  = 3;
+	m_HW = m_H*m_W;
 }
 
 octreeSHM::~octreeSHM() {
@@ -17,22 +18,21 @@ octreeSHM::~octreeSHM() {
 	delete[] vTable;
 }
 
+
+
+
 void octreeSHM::loadVertexId(const unsigned &id) {
 
 	if(id<m_Volume_Population) {
 
 		m_id = id; //ESTO TENGO QUE ARREGLARLO: OTRAS FUNCIONES DEPENDEN DE QUE ESTA SEA LLAMADA PRIMERO PARA PODER USAR m_id
 
-//		int m_W{3}, m_H{3}, m_L{3};
-		int HW = m_H*m_W;                       //Count vertex in a layer
-    	int count_Cells_layer = (m_H-1)*(m_W-1);//Count elements in a layer
-
-    	int count_rows_passed = 0;              //Adds the last vertex of the row |-0-|-1-|-2-|-3-(|) <-this
-    	int count_layers_passed = 0;            //Adds the top row of vertex-W
-
+   		int count_Cells_layer = (m_H-1)*(m_W-1);//Count elements in a layer
+   		int count_rows_passed = 0;              //Adds the last vertex of the row |-0-|-1-|-2-|-3-(|) <-this
+   		int count_layers_passed = 0;            //Adds the top row of vertex-W
 		int id_eq = id - (id/8)*8; //esto lleva cualquier id a su equivalente en la primera celda
-        count_rows_passed = id_eq/(m_W-1);
-        count_layers_passed = id_eq/count_Cells_layer;
+		count_rows_passed = id_eq/(m_W-1);
+		count_layers_passed = id_eq/count_Cells_layer;
 
 		int i = id_eq + count_rows_passed + count_layers_passed * m_W + (id/8)*(m_H*m_W*3);
 
@@ -42,16 +42,49 @@ void octreeSHM::loadVertexId(const unsigned &id) {
     	this->Vertex[1] = &Mesh[i+1];		//(1 0 0)
     	this->Vertex[2] = &Mesh[i+1+m_W];	//(1 0 1)
     	this->Vertex[3] = &Mesh[i+m_W];		//(0 0 1)
-
-    	this->Vertex[4] = &Mesh[i+HW];		//(0 1 0)
-    	this->Vertex[5] = &Mesh[i+1+HW];	//(1 1 0)
-    	this->Vertex[6] = &Mesh[i+1+m_W+HW];	//(1 1 1)
-    	this->Vertex[7] = &Mesh[i+m_W+HW];	//(0 1 1)
-	
+    	this->Vertex[4] = &Mesh[i+m_HW];		//(0 1 0)
+    	this->Vertex[5] = &Mesh[i+1+m_HW];	//(1 1 0)
+    	this->Vertex[6] = &Mesh[i+1+m_W+m_HW];	//(1 1 1)
+    	this->Vertex[7] = &Mesh[i+m_W+m_HW];	//(0 1 1)
 		//OBS: los centroides no estan optimiz y de momento no comparten info asi el indice no hay que procesarlo como para los vertex
     }
     
-    else{std::cout<<"[ERROR] ID out of bound"<<std::endl;}
+    else{std::cout<<"[ERROR] ID out of bound in OCTREE"<< std::endl;
+    	 std::cout<<"Llamando a la celda: " << m_id << "/" << m_Volume_Population<<std::endl; }
+}
+
+
+//own implementation of loadVertexId for octree level as it maps cell in other way
+void octreeSHM::loadVertexId(const unsigned &id, int octreeLevel) {
+
+	if(id<m_Volume_Population) {
+
+		m_id = id; //ESTO TENGO QUE ARREGLARLO: OTRAS FUNCIONES DEPENDEN DE QUE ESTA SEA LLAMADA PRIMERO PARA PODER USAR m_id
+
+   		int count_Cells_layer = (m_H-1)*(m_W-1);//Count elements in a layer
+   		int count_rows_passed = 0;              //Adds the last vertex of the row |-0-|-1-|-2-|-3-(|) <-this
+   		int count_layers_passed = 0;            //Adds the top row of vertex-W
+		int id_eq = id - (id/8)*8; //esto lleva cualquier id a su equivalente en la primera celda
+		count_rows_passed = id_eq/(m_W-1);
+		count_layers_passed = id_eq/count_Cells_layer;
+
+		int i = id_eq + count_rows_passed + count_layers_passed * m_W + (id/8)*(m_H*m_W*3);
+
+		//Mapp of local vertex enum		global possition XYZ in a dimensional global frame reference
+		//ESTE TAMBIEN HAY QUE ARREGLARLO PORQUE ESTE MAPEADO SOLO SIRVE PARA LA MALLA DE LEVEL0 LOS DEMAS LEVEL TIENEN OTRO MAPEADO
+		this->Vertex[0] = &Mesh[i];		//(0 0 0)
+    	this->Vertex[1] = &Mesh[i+1];		//(1 0 0)
+    	this->Vertex[2] = &Mesh[i+1+m_W];	//(1 0 1)
+    	this->Vertex[3] = &Mesh[i+m_W];		//(0 0 1)
+    	this->Vertex[4] = &Mesh[i+m_HW];		//(0 1 0)
+    	this->Vertex[5] = &Mesh[i+1+m_HW];	//(1 1 0)
+    	this->Vertex[6] = &Mesh[i+1+m_W+m_HW];	//(1 1 1)
+    	this->Vertex[7] = &Mesh[i+m_W+m_HW];	//(0 1 1)
+		//OBS: los centroides no estan optimiz y de momento no comparten info asi el indice no hay que procesarlo como para los vertex
+    }
+    
+    else{std::cout<<"[ERROR] ID out of bound in OCTREE: "<< octreeLevel <<std::endl;
+    	 std::cout<<"Llamando a la celda: " << m_id << "/" << m_Volume_Population<<std::endl; }
 }
 
 void octreeSHM::setHexMeshElement(structuredHexMesh& MeshUP) {
