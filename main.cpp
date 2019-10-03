@@ -9,9 +9,9 @@ int main()
 	float VIEW_ROTX = 0;
 	float VIEW_ROTZ = 0;
 
-	int NEL = 2;
+	int NEL = 6;
 	int t=0;
-	int tfin = 1000;
+	int tfin = 4;
 
 	structuredHexMesh MyCube;
 	//Defining the mesh-surface that will be extruded later
@@ -19,29 +19,29 @@ int main()
 	{
 		vec3 cubeMeshSurface[] {
 			vec3(0.0 , 0.0, 0.0),
-			vec3(20.75, 0.0, 0.0),
-			vec3(50.25, 0.0, 0.0),
-			vec3(100.0 , 0.0, 0.0),
+			vec3(1.0 , 0.0, 0.0),
+			vec3(2.0 , 0.0, 0.0),
+			vec3(3.0 , 0.0, 0.0),
 
 			vec3(0.0 , 0.0, 1.0),
-			vec3(20.75, 0.0, 1.0),
-			vec3(50.25, 0.0, 1.0),
-			vec3(100.0 , 0.0, 1.0),
+			vec3(1.0 , 0.0, 1.0),
+			vec3(2.0 , 0.0, 1.0),
+			vec3(3.0 , 0.0, 1.0),
 
 			vec3(0.0 , 0.0, 2.0),
-			vec3(20.75, 0.0, 2.0),
-			vec3(50.25, 0.0, 2.0),
-			vec3(100.0 , 0.0, 2.0),
+			vec3(1.0 , 0.0, 2.0),
+			vec3(2.0 , 0.0, 2.0),
+			vec3(3.0 , 0.0, 2.0),
 
 			vec3(0.0 , 0.0, 3.0),
-			vec3(20.75, 0.0, 3.0),
-			vec3(50.25, 0.0, 3.0),
-			vec3(100.0 , 0.0, 3.0)
+			vec3(1.0 , 0.0, 3.0),
+			vec3(2.0 , 0.0, 3.0),
+			vec3(3.0 , 0.0, 3.0)
 		};
 
 		for(int i=0; i< sizeof(cubeMeshSurface)/sizeof(vec3); i++) {
 
-			cubeMeshSurface[i].Add(vec3(0.25,0.0,0.0));
+			cubeMeshSurface[i].Add(vec3(0.1,0.0,0.0));
 		}
 
 		MyCube.SweepFace(cubeMeshSurface, 4, 4, NEL, PI/(float) NEL, vec3(0.0,0.0,0.0));
@@ -106,7 +106,7 @@ int main()
 
 		//[Info] Updating position of points insertion
 		int iop = 0; //{iop = 0 (Add); iop = 1 (Substract)} //this line will remove after suit documentation
-		points[0].ForEach(points, number_of_points, vec3(1.5, 0.0, 0.0), 0);
+		points[0].ForEach(points, number_of_points, vec3(0.01, 0.0, 0.0), 0);
 
 
 		//[Info] Reset to false all entries of subdivions before recompute the insertion points in next step
@@ -257,33 +257,46 @@ int main()
 //	system("chmod +x temp/gnu.data");
 //	system("./temp/gnu.data");
 
+//	std::string nameFile = "meshIO_" + std::integerToString(t);
 
-//	std::cout<<"DELETING OCTREES 7: "<< Octree_7->Log_Cells_Max() << std::endl;
+//	MyCube.WriteMesh(meshFileOF, nameFile);
+
+	std::cout<<"DELETING OCTREES 7: "<< Octree_7->Log_Cells_Max() << std::endl;
+//	Octree_7->WriteMesh();
 	delete Octree_7;
 }
 
-//	std::cout<<"DELETING OCTREES 6: "<< Octree_6->Log_Cells_Max() << std::endl;
+	std::cout<<"DELETING OCTREES 6: "<< Octree_6->Log_Cells_Max() << std::endl;
+//	Octree_6->WriteMesh();
 	delete Octree_6;
 }
 
-//	std::cout<<"DELETING OCTREES 5: "<< Octree_5->Log_Cells_Max() << std::endl;
+	std::cout<<"DELETING OCTREES 5: "<< Octree_5->Log_Cells_Max() << std::endl;
+//	Octree_5->WriteMesh();
 	delete Octree_5;
 }
 
-//	std::cout<<"DELETING OCTREES 4: "<< Octree_4->Log_Cells_Max() << std::endl;
+	std::cout<<"DELETING OCTREES 4: "<< Octree_4->Log_Cells_Max() << std::endl;
+//	Octree_4->WriteMesh();
 	delete Octree_4;
 }
 
-//	std::cout<<"DELETING OCTREES 3: "<< Octree_3->Log_Cells_Max() << std::endl;
+	std::cout<<"DELETING OCTREES 3: "<< Octree_3->Log_Cells_Max() << std::endl;
+//	Octree_3->WriteMesh();
 	delete Octree_3;
 }
 
-//	std::cout<<"DELETING OCTREES 2: "<< Octree_2->Log_Cells_Max() << std::endl;
+	std::cout<<"DELETING OCTREES 2: "<< Octree_2->Log_Cells_Max() << std::endl;
+	Octree_2->WriteMesh();
 	delete Octree_2;
 }
-//	std::cout<<"DELETING OCTREES 1: "<< Octree_1->Log_Cells_Max() << std::endl;
+	std::cout<<"DELETING OCTREES 1: "<< Octree_1->Log_Cells_Max() << std::endl;
+
+//	Octree_1->WriteMesh();
 	delete Octree_1;
 }
+
+//	MyCube.WriteMesh();
 
 	std::cout<<"TIME-STAMP: "<<t<<"/"<<tfin<<std::endl;
 //	t++;

@@ -167,6 +167,6 @@ void vec3::ForEach(vec3* array, const int& size_array, const vec3& other,  int m
 
 std::ostream& operator<<(std::ostream& stream, const vec3& vector)
     {
-        stream  << vector.x << " " << vector.y << " " << vector.z ;
+        stream  << vector.x << ", " << vector.y << ", " << vector.z ;
         return stream;
     }
