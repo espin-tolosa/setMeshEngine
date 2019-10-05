@@ -67,18 +67,22 @@ class structuredHexMesh : public vec3
     void setOctreeLevel1(vec3 Qt[], int Divisions);
     void setOctreeLevel2(vec3 Qt[], int Divisions);
 
-    void SweepFace(const vec3 MeshSurface[],const int& c_Xwide, const int& c_Zheight, const int& c_Ysweep, const double& sweepValue, const vec3& origin);
+    void SweepFace(const vec3* Surface, const int& nel_X, const int& nel_Z, const int& nel_Sweep, const double& delta_Sweep, const vec3& origin_Sweep);
 
     virtual void loadVertexId(const unsigned& id);
-    bool vertexSearchCell(const vec3& point);
-
-    void Log() const;
+    
+	bool vertexSearchCell(const vec3& point);
+    
+	void Log() const;
     void Log_Cells() const;
     unsigned Log_Cells_Max() const;
     unsigned Log_Verts() const;
 
 //	void WriteMesh(std::string nameFile);
 	void WriteMesh(std::ofstream *meshFileOF, std::string nameFile, int level);
+
+	private:
+	void AllocateMesh();
 
 };
 

@@ -351,50 +351,94 @@ structuredHexMesh::~structuredHexMesh()
 	    Cell_Centroids[m_id] = centerS;
 }
 
-void structuredHexMesh::SweepFace(const vec3 MeshSurface[], const int& c_Xwide, const int& c_Zheight, const int& c_Ysweep, const double& sweepValue, const vec3& origin)
-    {
-    if(Mesh==0)
-    {
-        m_H= c_Zheight; m_W= c_Xwide; m_HW= m_H*m_W;
- 		// m_id = (m_H-1)*(m_W-1)*c_Ysweep;
-
-        m_Vertex_Population = (c_Ysweep+1)*m_H*m_W;
-        m_Volume_Population = (m_H-1)*(m_W-1)*c_Ysweep;
-
-        int count_MeshSurface = m_H*m_W;
-
-        Mesh           = new vec3[m_Vertex_Population];
-        Cell_Centroids = new vec3[m_Volume_Population];
+void structuredHexMesh::AllocateMesh()
+{
+	Mesh           = new vec3[m_Vertex_Population];
+	Cell_Centroids = new vec3[m_Volume_Population];
 	Cell_Divided   = new bool[m_Volume_Population]{false};
 	Face_UNormals  = new vec3[m_Volume_Population*6]; //each cube has six normals, not using face-share optimiz.
 	Face_Centroids = new vec3[m_Volume_Population*6];
-
 //	u = new double[m_Volume_Population]{0.0};
 //	r = new double[m_Volume_Population]{0.0};
 //	T = new double[m_Volume_Population]{0.0};
 //	p = new double[m_Volume_Population]{0.0};
+}
 
-	for(int i=0; i<m_H*m_W; i++)
-	{
-		Mesh[i] = MeshSurface[i];
-        	for (int j = 0; j<c_Ysweep; j++)
-        	{	//Extrude a mesh around Z-axis
-			Mesh[i+(j+1)*m_H*m_W] = vec3::Loc2Glob(vec3::RotZ(vec3::Glob2Loc(Mesh[i],origin),(j+1)*sweepValue),origin);
-        	}
-        }
+
+/*---------------------------------------------------------
+ * proc SweepFace
+ * ---------------------
+ *
+ * Create a mesh struding the Surface[] around axis-Z
+ * and center of revolve: Origin_Sweep
+ * an angle equals to nel_Sweep * delta_Sweep
+ *
+ * Tis proc is candidate to be generalized by using
+ * pointer function in the extruding operation. By now,
+ * the compiled operation is RotZ as far as I don't need
+ * more by now.
+ *
+ * To check:
+ *
+ * passing Surface Array by const pointer is OK by now
+ *
+ * evaluate performance of copy: Mesh[i] = *(Surface++);
+ *
+ * performance of: if(Mesh==0) is it passing everthing
+ * or filtering vod mesh properly?
+ *
+ * add ForEach procedure to simplify the Loop sintaxis
+ * ------------------------------------------------------*/
+void structuredHexMesh::SweepFace(const vec3* Surface, const int& nel_TSx, const int& nel_TSz, const int& nel_Sweep, const double& delta_Sweep, const vec3& Origin_Sweep)
+{
+    if(Mesh==0)
+    {
+        m_H  = nel_TSz;
+		m_W  = nel_TSx;
+		m_HW = m_H*m_W;
+
+		m_Vertex_Population = (nel_Sweep + 1) * m_H*m_W   ;
+        m_Volume_Population =  nel_Sweep * (m_H-1)*(m_W-1);
+
+		structuredHexMesh::AllocateMesh();
+
+		for(int i=0; i<m_H*m_W; i++) {
+
+			Mesh[i] = *(Surface++);
+			for (int j = 0; j < nel_Sweep; j++) {
+	
+				Mesh[i+(j+1)*m_H*m_W] = vec3::Loc2Glob(vec3::RotZ(vec3::Glob2Loc(Mesh[i],Origin_Sweep),(j+1)*delta_Sweep), Origin_Sweep);
+       		}
+		}
     
-        std::cout<<"[SWEEP] POPULATION: "<<m_Volume_Population<<std::endl;
-    }
+		std::cout<<"[SWEEP] POPULATION: "<<m_Volume_Population<<std::endl;
+   	}
 
     else
     {
         std::cout<<"Mesh has been already created"<<std::endl;
     }
-    }
+}
 
+/*---------------------------------------------------------
+ * proc vectexSearchCell
+ * ---------------------
+ *
+ *  this proc takes the private vars: m_id
+ *  actually is not necessary to call loadVertexId
+ *
+ *  I could simply add in first line m_id = id;
+ *  the reason for hat is other private vars: Face_*[]
+ *  are stored in memory as a linear array without any
+ *  cell structure taking in advantage.
+ *
+ *  So, it is better do not change this because...
+ *  I will implement some data structure to share common
+ *  faces, vertex,... then I'll really need loadVertexID
+ *
+ * ------------------------------------------------------*/
 bool structuredHexMesh::vertexSearchCell(const vec3& point)
 {
-	double dotCheck;
 	for (int i=0; i<6 ;i++) //It will placed here ForEach
 	{
 		if(vec3::Dot(vec3::Glob2Loc(point, Face_Centroids[m_id*6 + i]), Face_UNormals[m_id*6 + i]) > 0.000001)
@@ -409,7 +453,6 @@ bool structuredHexMesh::vertexSearchCell(const vec3& point)
 	return true;
 }
 
-
 //	HW________________Count vertex in a layer
 //	(H-1)(W-1)________Count elements in a layer
 //	id/(W-1)__________Adds the last vertex of the row |-0-|-1-|-2-|-3-(|) <-this 
@@ -417,9 +460,13 @@ bool structuredHexMesh::vertexSearchCell(const vec3& point)
 
 void structuredHexMesh::loadVertexId(const unsigned &id) {
 
+//	std::cout << "Pointer to m_ID: " << &m_id << std::endl;
+//	std::cout << "EL valor de m_id antes de ejecutra la funcion: " << m_id << std::endl;
 	if(id<m_Volume_Population)
     {
     	m_id = id;
+//	std::cin.get();
+
 		int i = m_id + (m_id/(m_W-1)) + (m_id/((m_W-1)*(m_H-1)))*m_W;
 
 		//ESTE TAMBIEN HAY QUE ARREGLARLO PORQUE ESTE MAPEADO SOLO SIRVE PARA LA MALLA DE LEVEL0 LOS DEMAS LEVEL TIENEN OTRO MAPEADO

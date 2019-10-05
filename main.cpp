@@ -11,8 +11,9 @@ int main()
 
 	int NEL = 10;
 	int t=0;
-	int tfin = 300;
+	int tfin = 220;
 
+	bool load_mesh = false; //load mesh vertex for loadVertexID proc
 	structuredHexMesh MyCube;
 	//Defining the mesh-surface that will be extruded later
 	//with SweepFace to create a 3D hexaedral structured-mesh
@@ -47,16 +48,31 @@ int main()
 		MyCube.SweepFace(cubeMeshSurface, 4, 4, NEL, 2.0*PI/(float) NEL, vec3(0.0,0.0,0.0));
 		//MyCube.DisplaceMesh(vec3(0.,-1.5,-1.5));
 
-		//This command compute cell centers of all cells for the mesh
+		{
+		unsigned id = 3;
+
+			//std::cout << "Pointer to ID: " << &id << std::endl;
+			MyCube.loadVertexId(id);
+		id = 5;
+			//std::cout << "Pointer to ID: " << &id << std::endl;
+			MyCube.loadVertexId(id);
+		}
+			//std::cout << "Pointer to ID: " << &id << std::endl;
+			MyCube.Log();	
+			
+			//This command compute cell centers of all cells for the mesh
 		for(int i=0; i< (int)MyCube.Log_Cells_Max(); i++) {
 
 			MyCube.loadVertexId((unsigned) i);
 			MyCube.CenterC8();
 		}
+
+			MyCube.Log();	
 	} //end of scope of 2D mesh-surface: cubeMeshSurface 
 
 	//Defining an cloud of points to test the octree algorithm
 	vec3 points[] { vec3(  0.0, 0.0, 0.0),
+			vec3(  0.0, 0.0, 0.3),
 	       		vec3(  1.0, 0.0, 0.0),
        			vec3( -1.0, 0.0, 0.0),
 			vec3(  0.0, 1.0, 0.0),
@@ -131,6 +147,8 @@ int main()
 				*(MyCube.Cell_Divided+i) = false;
 			}
 		}
+/*
+// El trozo de siempre
 
 		//[Info] Buscando en MyCube los puntos insertados	
 		for(int k=0; k<(int)MyCube.Log_Cells_Max(); k++) {
@@ -144,8 +162,24 @@ int main()
 				}
 			}
 		}
+*/
+// El trozo en testeo:
 
-		
+		//[Info] Buscando en MyCube los puntos insertados	
+		for(unsigned id=0; id < MyCube.Log_Cells_Max(); id++) {
+
+			MyCube.loadVertexId(id);
+			for(int j=0; j<number_of_points; j++) {
+				//if the cell is not yet divided enters in search function to check if a  point is there
+				if(!MyCube.Cell_Divided[id]) {
+			
+					MyCube.vertexSearchCell(points[j]);
+				}
+			}
+		}
+
+// fin trozo en testeo
+	
 		//[Info] Craeting Octree level 1
 		if(MyCube.Total_Cell_Divided) {
 		octreeSHM* Octree_1 = new octreeSHM;
@@ -274,41 +308,41 @@ int main()
 
 //	MyCube.WriteMesh(meshFileOF, nameFile);
 
-//	std::cout<<"DELETING OCTREES 7: "<< Octree_7->Log_Cells_Max() << std::endl;
+	std::cout<<"DELETING OCTREES 7: "<< Octree_7->Log_Cells_Max() << std::endl;
 	Octree_7->WriteMesh(&meshFileOF, nameFile, 7);
 	delete Octree_7;
 }
 
-//	std::cout<<"DELETING OCTREES 6: "<< Octree_6->Log_Cells_Max() << std::endl;
+	std::cout<<"DELETING OCTREES 6: "<< Octree_6->Log_Cells_Max() << std::endl;
 	Octree_6->WriteMesh(&meshFileOF, nameFile, 6);
 	delete Octree_6;
 }
 
-//	std::cout<<"DELETING OCTREES 5: "<< Octree_5->Log_Cells_Max() << std::endl;
+	std::cout<<"DELETING OCTREES 5: "<< Octree_5->Log_Cells_Max() << std::endl;
 	Octree_5->WriteMesh(&meshFileOF, nameFile, 5);
 	delete Octree_5;
 }
 
-//	std::cout<<"DELETING OCTREES 4: "<< Octree_4->Log_Cells_Max() << std::endl;
+	std::cout<<"DELETING OCTREES 4: "<< Octree_4->Log_Cells_Max() << std::endl;
 	Octree_4->WriteMesh(&meshFileOF, nameFile, 4);
 	delete Octree_4;
 }
 
-//	std::cout<<"DELETING OCTREES 3: "<< Octree_3->Log_Cells_Max() << std::endl;
+	std::cout<<"DELETING OCTREES 3: "<< Octree_3->Log_Cells_Max() << std::endl;
 	Octree_3->WriteMesh(&meshFileOF, nameFile, 3);
 	delete Octree_3;
 }
 
-//	std::cout<<"DELETING OCTREES 2: "<< Octree_2->Log_Cells_Max() << std::endl;
+	std::cout<<"DELETING OCTREES 2: "<< Octree_2->Log_Cells_Max() << std::endl;
 	Octree_2->WriteMesh(&meshFileOF, nameFile, 2);
 	delete Octree_2;
 }
-//	std::cout<<"DELETING OCTREES 1: "<< Octree_1->Log_Cells_Max() << std::endl;
+	std::cout<<"DELETING OCTREES 1: "<< Octree_1->Log_Cells_Max() << std::endl;
 	Octree_1->WriteMesh(&meshFileOF, nameFile, 1);
 	delete Octree_1;
 }
 
-//	MyCube.WriteMesh(&meshFileOF, nameFile, 0);
+	MyCube.WriteMesh(&meshFileOF, nameFile, 0);
 	std::cout<<"TIME-STAMP: "<<t<<"/"<<tfin<<std::endl;
 //	t++;
 //	VIEW_ROTZ += 1;
@@ -324,6 +358,7 @@ int main()
 //	system("convert -delay 100 -loop 0 *.png anim_001.gif");
 //	system("rm *.png");
 //	system("rm temp/*");
+	system("echo inserting headers temp/meshIO...");
 	system("sed -i '1 i\\x, y, z, level' temp/meshIO_*");
 //	system("zip -r temp.zip temp/");
 	return 0;
