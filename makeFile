@@ -1,5 +1,7 @@
 #!/bin/bash
 
+rm temp/*
+
 g++ -c src/functions/*.cpp
 g++ -c src/geometry/structuredHexMesh.cpp
 g++ -c src/geometry/octreeSHM.cpp
@@ -13,3 +15,8 @@ g++ -std=c++11 -o main main.o setfun.o structuredHexMesh.o octreeSHM.o log.o vec
 rm *.o
 
 time ./main
+
+echo inserting headers temp/meshIO...
+sed -i '1 i\\x, y, z, level' temp/meshIO_*
+zip -r temp.zip temp/
+mv temp.zip ~/temp.zip

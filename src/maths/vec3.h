@@ -39,20 +39,35 @@ struct vec3
     double DotCross(const vec3& A, const vec3& B, const vec3& C);
     double DotCross(const vec3& origin, const vec3& p1, const vec3& p2, const vec3& p3);
 
-    vec3 RotX(const vec3& p1, double alpha);
+//Rotation of p1 around global origin (0,0,0)
+//this functions are the older rotations
+	vec3 RotX(const vec3& p1, double alpha);
     vec3 RotY(const vec3& p1, double alpha);
     vec3 RotZ(const vec3& p1, double alpha);
 
-    vec3 AbsoluteVec3(const vec3& p1);
+//Rotations along local origin p0
+//this rotations are newer and still not implemented
+//in the rst of the code that uses rotations
+//    void LocRotX(const vec3& p0, double alpha);
+//    void LocRotY(const vec3& p0, double alpha);
+//    void LocRotZ(const vec3& p0, double alpha);
+
+    void LocRotX(double alpha);
+    void LocRotY(double alpha);
+    void LocRotZ(double alpha);
+
+	vec3 AbsoluteVec3(const vec3& p1);
 
     double Norma();
     double Norma(const vec3& other);
 
-    //Create a vertex between 3Dline Xi-Xj as: X(sigma(0:1))->|Xi:Xj|
+   //Create a vertex between 3Dline Xi-Xj as: X(sigma(0:1))->|Xi:Xj|
     vec3 Line(const vec3& Xi, const vec3& Xj, double sigma);
 
-	//Pointer functions to run over arrays elements of vec3 type
-	void ForEach(vec3* array, const int& size_array, const vec3& other,  int method_type);
+//Pointer functions to run over arrays elements of vec3 type
+	void ArithmeticForEach(vec3* array, const int& size_array, const vec3& other,  int method_type);
+//Pointer functions to run over arrays elements of vec3 type
+	void LocRotForEach(vec3* array, const int& size_array, double alpha, int method_type);
 
 	friend std::ostream& operator<<(std::ostream& stream, const vec3& vector);
 

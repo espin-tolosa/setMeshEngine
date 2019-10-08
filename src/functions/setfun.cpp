@@ -1,5 +1,5 @@
 #include <iostream>
-
+#include <random>
 /**SOME DAY THIS FUNCTION WILL WORK PROPERLY BUT NOT NOW
 //issues:   definicion de funciones en diferentes scopes: tengo que definir la funcion toLoweCase dentro la funcion porque no la encuentra
 //          el retorno de una variable tipo new no sé cómo se hace ahora mismo de forma óptima, porque quería pasar su dirección pero tambien tendría que pasar su tamaño
@@ -117,3 +117,31 @@ void int2char(int ascii_code)
     std::cout<<"\nASCII codification of "<< ascii_code<<" -> '"<<(unsigned char) ascii_code<<"'";
     std::cout<<"\n-------------------------------------\n";
 }
+
+double dRandom(const double& lower, const double& upper)
+{
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_real_distribution<double> dis(lower, upper);
+
+    return dis(gen);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

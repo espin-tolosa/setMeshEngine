@@ -441,7 +441,7 @@ bool structuredHexMesh::vertexSearchCell(const vec3& point)
 {
 	for (int i=0; i<6 ;i++) //It will placed here ForEach
 	{
-		if(vec3::Dot(vec3::Glob2Loc(point, Face_Centroids[m_id*6 + i]), Face_UNormals[m_id*6 + i]) > 0.000001)
+		if(vec3::Dot(vec3::Glob2Loc(point, Face_Centroids[m_id*6 + i]), Face_UNormals[m_id*6 + i]) > 0.0000000001)
 		{
 			return false;
 		}

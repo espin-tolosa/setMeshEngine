@@ -33,9 +33,9 @@ void vec3::Add(const double& other)
 
 void vec3::Substract(const vec3& other)
     {
-        this->x -= other.x;
-        this->y -= other.y;
-        this->z -= other.z;
+        x -= other.x;
+        y -= other.y;
+        z -= other.z;
     }
 
 void vec3::Substract(const float& other)
@@ -124,20 +124,74 @@ double vec3::DotCross(const vec3& origin, const vec3& p1, const vec3& p2, const 
     {return vec3::DotCross(vec3::Glob2Loc(p1,origin), vec3::Glob2Loc(p2,origin), vec3::Glob2Loc(p3,origin));}
 
 vec3 vec3::RotX(const vec3& p1, double alpha)
-    {return vec3(p1.x, p1.y*cosl(alpha) - p1.z*sinl(alpha), p1.y*sinl(alpha) + p1.z*cosl(alpha));}
+    {return vec3(p1.x, p1.y*cos(alpha) - p1.z*sin(alpha), p1.y*sin(alpha) + p1.z*cos(alpha));}
 
 vec3 vec3::RotY(const vec3& p1, double alpha)
-    {return vec3(p1.x*cosl(alpha) - p1.z*sinl(alpha), p1.y, p1.x*sinl(alpha) + p1.z*cosl(alpha));}
+    {return vec3(p1.x*cos(alpha) - p1.z*sin(alpha), p1.y, p1.x*sin(alpha) + p1.z*cos(alpha));}
 
 vec3 vec3::RotZ(const vec3& p1, double alpha) //precision error ~e-7
-    {return vec3(p1.x*cosl(alpha) - p1.y*sinl(alpha), p1.x*sinl(alpha) + p1.y*cosl(alpha), p1.z);}
+    {return vec3(p1.x*cos(alpha) - p1.y*sin(alpha), p1.x*sin(alpha) + p1.y*cos(alpha), p1.z);}
+/*
+void vec3::LocRotX(const vec3& p0, double alpha)
+    {
+		this->x = p0.x + (this->x-p0.x);
+		this->y = p0.y + (this->y-p0.y)*cos(alpha) - (this->z-p0.z)*sin(alpha);
+		this->z = p0.z + (this->y-p0.y)*sin(alpha) + (this->z-p0.z)*cos(alpha);
 
+		return;
+	}
+*/
+void vec3::LocRotX(double alpha)
+    {
+		this->x = (this->x);
+		this->y = (this->y)*cos(alpha) - (this->z)*sin(alpha);
+		this->z = (this->y)*sin(alpha) + (this->z)*cos(alpha);
+
+		return;
+	}
+/*
+void vec3::LocRotY(const vec3& p0, double alpha)
+    {
+		this->x = p0.x + (this->x-p0.x)*cos(alpha) - (this->z-p0.z)*sin(alpha);
+		this->y = p0.y + (this->y-p0.y);
+		this->z = p0.z + (this->x-p0.x)*sin(alpha) + (this->z-p0.z)*cos(alpha);
+
+		return;
+	}
+*/
+void vec3::LocRotY(double alpha)
+    {
+		this->x = (this->x)*cos(alpha) - (this->z)*sin(alpha);
+		this->y = (this->y);
+		this->z = (this->x)*sin(alpha) + (this->z)*cos(alpha);
+
+		return;
+	}
+/*
+void vec3::LocRotZ(const vec3& p0, double alpha)
+    {
+		this->x = p0.x + (this->x-p0.x)*cos(alpha) - (this->y-p0.y)*sin(alpha);
+		this->y = p0.y + (this->x-p0.x)*sin(alpha) + (this->y-p0.y)*cos(alpha);
+		this->z = p0.z + (this->z-p0.z);
+
+		return;
+	}
+*/
+void vec3::LocRotZ(double alpha)
+    {
+		x = x*cos(alpha) - y*sin(alpha);
+		y = x*sin(alpha) + y*cos(alpha);
+//		z = z;
+
+		return;
+	}
 vec3 vec3::AbsoluteVec3(const vec3& p1)
     {
-    double vx = p1.x;
-    double vy = p1.y;
-    double vz = p1.z;
-        if(p1.x<0.0) vx=-1.0*p1.x;
+    	double vx = p1.x;
+    	double vy = p1.y;
+    	double vz = p1.z;
+
+		if(p1.x<0.0) vx=-1.0*p1.x;
         if(p1.y<0.0) vy=-1.0*p1.y;
         if(p1.z<0.0) vz=-1.0*p1.z;
 
@@ -153,15 +207,29 @@ double vec3::Norma(const vec3& other)
 vec3 vec3::Line(const vec3& Xi, const vec3& Xj, double sigma)
     {return vec3(sigma*Xj.x + (1-sigma)*Xi.x, sigma*Xj.y + (1-sigma)*Xi.y, sigma*Xj.z + (1-sigma)*Xi.z);}
 
-void vec3::ForEach(vec3* array, const int& size_array, const vec3& other,  int method_type)
-{//stackoverflow.com/questions/31708302/function-pointer-array-to-a-method-within-a-class
+//stackoverflow.com/questions/31708302/function-pointer-array-to-a-method-within-a-class
+void vec3::ArithmeticForEach(vec3* array, const int& size_array, const vec3& other,  int method_type)
+{	
 	typedef void (vec3::*method_function)(const vec3&);
-	method_function method_pointer[2] = {&vec3::Add, &vec3::Substract};
+	method_function method_pointer[] = 	{&vec3::Add, &vec3::Substract, &vec3::Multiply, &vec3::Divide};
 	method_function function = method_pointer[method_type];
-//	int number_of_elements = sizeof(entity_array)/isizeof(vec3);
+
 	for(int i = 0;  i< size_array; i++)
 	{
 		((array + i)->*function)(other);
+	}
+}
+
+//void vec3::LocRotForEach(vec3* array, const int& size_array, const vec3& origin, double alpha, int method_type)
+void vec3::LocRotForEach(vec3* array, const int& size_array, double alpha, int method_type)
+{
+	typedef void (vec3::*method_function)(double);
+	method_function method_pointer[] =	{&vec3::LocRotX, &vec3::LocRotY, &vec3::LocRotZ};
+	method_function function = method_pointer[method_type];
+
+	for(int i = 0;  i< size_array; i++)
+	{
+		((array + i)->*function)(alpha);
 	}
 }
 

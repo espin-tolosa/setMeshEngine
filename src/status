@@ -68,13 +68,30 @@ Added function pointer to a method in vec3 class of kind: ForEach_Array_vec3_Ele
 OK
 
 ...........................................................................................................................................[NEWDAY]
-...........................................................................................................................................[STATUS]
+03/10/2019
+Ya puedo exportar todos los puntos de la malla y de los octrees, problema:
+se exportan tal cual estan almacenados en memoria Tengo que definir una capa intermedia de estructura entre MESH/IO
 
+He anadido una funcion loadVertexId que conoce el Octree que le esta llamando. Si da ERROR Out Of Bound te dice cual ha fallado
+
+He anadido un epsilon al calculo de vertexSearchCell. Evita que no encuentre nada si el punto esta justo en el BoundaryBox
+...........................................................................................................................................[STATUS]
+The most critical issue now: Create a data base mesh structure for  all octree leves and later solve faces and normals storage
 ...........................................................................................................................................[HOWFIX]
 ...........................................................................................................................................[NEWDAY]
+08/10/2019
 ...........................................................................................................................................[STATUS]
-
+Descubierto bug en LocRotForEach. Hace que el radio de giro disminuya prograsivamente.
+vec3::RotZ ha sido comprobada y funciona correctamente no viendose afectada por este efecto.
 ...........................................................................................................................................[HOWFIX]
+Tengo cierta inconsistencia en el codigo al llamar ForEach para un array Tengo que usar Item[0].ForEach(foo)
+Lo cual queda horrible. Debería arregla eso. Y luego ver otra inconsistencia con el tipado de estas funciones
+y del código en general. Tengo poblemas con (long y double) y con (unsigned e int)
+
+Tengo dos rutinas para añadir una es escribir Vec3 en un CSV
+La otra es arreglar LocRotForEach
+
+Despues tengo que quitar el codigo en testeo que esta cuasiduplicado
 ...........................................................................................................................................[NEWDAY]
 ...........................................................................................................................................[STATUS]
 

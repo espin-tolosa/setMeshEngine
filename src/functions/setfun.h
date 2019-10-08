@@ -30,5 +30,6 @@ void type_is_(const long double &var);
 
 void int2char(int ascii_code);
 
+double dRandom(const double& lower, const double& upper);
 #endif // SETFUN_H_INCLUDED
 
