@@ -1,7 +1,7 @@
 #ifndef STRUCTUREDHEXMESH_H_INCLUDED
 #define STRUCTUREDHEXMESH_H_INCLUDED
 
-
+//#include <iostream>
 #include <string.h>
 #include <fstream>
 
@@ -74,6 +74,8 @@ class structuredHexMesh : public vec3
 	bool vertexSearchCell(const vec3& point);
     
 	void Log() const;
+
+    void Log_Cell() const;
     void Log_Cells() const;
     unsigned Log_Cells_Max() const;
     unsigned Log_Verts() const;

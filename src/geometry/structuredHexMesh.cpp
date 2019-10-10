@@ -67,9 +67,9 @@ structuredHexMesh::~structuredHexMesh()
 //      std::cout<<"[DESTRUCTOR]: Structured Mesh"<<std::endl;
         delete[] Mesh;
         delete[] Cell_Centroids;
-	delete[] Cell_Divided;
-	delete[] Face_UNormals;
-	delete[] Face_Centroids;
+	    delete[] Cell_Divided;
+	    delete[] Face_UNormals;
+	    delete[] Face_Centroids;
 
 //	delete[] u;
 //	delete[] r;
@@ -395,6 +395,7 @@ void structuredHexMesh::SweepFace(const vec3* Surface, const int& nel_TSx, const
     {
         m_H  = nel_TSz;
 		m_W  = nel_TSx;
+        m_L  = nel_Sweep+1;
 		m_HW = m_H*m_W;
 
 		m_Vertex_Population = (nel_Sweep + 1) * m_H*m_W   ;
@@ -497,6 +498,33 @@ void structuredHexMesh::Log() const
     {
     	std::cout<<"\tID "<<i<<"\t"<<*Vertex[i]<<std::endl;
     }
+}
+
+void structuredHexMesh::Log_Cell() const
+{
+//assuming we want to load cell id
+    unsigned IDX{0};
+    unsigned IDY{0};
+    unsigned IDZ{0};
+
+    std::cout << "Array Coordinates (ID-XZY) of Cell ID: " << m_id << std::endl;
+    std::cout << "--------------------------------------------" << std::endl;
+
+    IDX = m_id % (m_H-1);
+    std::cout << "IDX: " << IDX << std::endl;
+
+    IDZ = (m_id / (m_H-1)) % (m_W-1); 
+    std::cout << "IDZ: " << IDZ << std::endl;
+
+    IDY = (m_id / ((m_H-1)*(m_W-1))) % (m_L-1);
+    std::cout << "IDY: " << IDY << std::endl;
+
+    if(IDX == 0)        std::cout << "Wall at B-Face" << std::endl;
+    if(IDZ == 0)        std::cout << "Wall at S-Face" << std::endl;
+    if(IDY == 0)        std::cout << "Wall at L-Face" << std::endl;
+    if(IDX == (m_H-2))  std::cout << "Wall at F-Face" << std::endl;
+    if(IDZ == (m_W-2))  std::cout << "Wall at N-Face" << std::endl;
+    if(IDY == (m_L-2))  std::cout << "Wall at R-Face" << std::endl;
 }
 
 void structuredHexMesh::Log_Cells() const
