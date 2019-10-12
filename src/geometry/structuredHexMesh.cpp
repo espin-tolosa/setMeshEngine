@@ -56,7 +56,7 @@ structuredHexMesh::structuredHexMesh()
         m_Vertex_Population(0), m_Face_Population(0), m_Volume_Population(0), m_id(0),
         m_Total_Volume(0.0), m_cell_Volume(0.0),
         Mesh(), Cell_Centroids(), Cell_Divided(), Vertex(), Edge_i(), Edge_j(), Tris(), Quad(),
-		Total_Cell_Divided(0)
+		Total_Cell_Divided(0), Boundary_Cell()
 
         {
 //            std::cout<<"\n[CONSTRUCTOR]: Structured Mesh\n"<<std::endl;
@@ -358,6 +358,7 @@ void structuredHexMesh::AllocateMesh()
 	Cell_Divided   = new bool[m_Volume_Population]{false};
 	Face_UNormals  = new vec3[m_Volume_Population*6]; //each cube has six normals, not using face-share optimiz.
 	Face_Centroids = new vec3[m_Volume_Population*6];
+    Boundary_Cell  = new bool[m_Volume_Population]{false};
 //	u = new double[m_Volume_Population]{0.0};
 //	r = new double[m_Volume_Population]{0.0};
 //	T = new double[m_Volume_Population]{0.0};
@@ -507,24 +508,38 @@ void structuredHexMesh::Log_Cell() const
     unsigned IDY{0};
     unsigned IDZ{0};
 
-    std::cout << "Array Coordinates (ID-XZY) of Cell ID: " << m_id << std::endl;
-    std::cout << "--------------------------------------------" << std::endl;
+//    std::cout << "Array Coordinates (ID-XZY) of Cell ID: " << m_id << std::endl;
+//    std::cout << "--------------------------------------------" << std::endl;
 
     IDX = m_id % (m_H-1);
-    std::cout << "IDX: " << IDX << std::endl;
-
     IDZ = (m_id / (m_H-1)) % (m_W-1); 
-    std::cout << "IDZ: " << IDZ << std::endl;
-
     IDY = (m_id / ((m_H-1)*(m_W-1))) % (m_L-1);
-    std::cout << "IDY: " << IDY << std::endl;
 
-    if(IDX == 0)        std::cout << "Wall at B-Face" << std::endl;
-    if(IDZ == 0)        std::cout << "Wall at S-Face" << std::endl;
-    if(IDY == 0)        std::cout << "Wall at L-Face" << std::endl;
-    if(IDX == (m_H-2))  std::cout << "Wall at F-Face" << std::endl;
-    if(IDZ == (m_W-2))  std::cout << "Wall at N-Face" << std::endl;
-    if(IDY == (m_L-2))  std::cout << "Wall at R-Face" << std::endl;
+    if(IDX == 0)        {Boundary_Cell[m_id] = true;}// "Wall at B-Face"
+    if(IDZ == 0)        {Boundary_Cell[m_id] = true;}// "Wall at S-Face"
+    if(IDY == 0)        {Boundary_Cell[m_id] = true;}// "Wall at L-Face"
+    if(IDX == (m_H-2))  {Boundary_Cell[m_id] = true;}// "Wall at F-Face"
+    if(IDZ == (m_W-2))  {Boundary_Cell[m_id] = true;}// "Wall at N-Face"
+    if(IDY == (m_L-2))  {Boundary_Cell[m_id] = true;}// "Wall at R-Face"
+
+//    std::cout<<"Check Bool: " << m_id <<" " << Boundary_Cell[m_id] << std::endl;
+//    if(Boundary_Cell[m_id]) std::cout<< "Element is Wall Boundary Cell" << std::endl;
+
+
+    //here comes:
+    //Input: Item.(x,y,z) -> Cell_ID.(X, Y, Z)
+    //Based on geometric global parameters
+
+    //Cartesian
+    // IDX <- x/W
+    // IDY <- y/L
+    // IDZ <- z/H
+
+    //Cilindrical
+    // IDA <- atan(y/x)/alpha
+    // IDR <- sqrt(x*x + y*y)/W
+    // IDZ <- z/H
+
 }
 
 void structuredHexMesh::Log_Cells() const
@@ -563,7 +578,9 @@ void structuredHexMesh::WriteMesh(std::ofstream *meshFileOF, std::string nameFil
 	{
 		for(int i = 0; i<this->Log_Verts(); i++)
 		{
+            if(Boundary_Cell[i]) {
 			*meshFileOF << this->Mesh[i]<<", "<<level<<std::endl;
+            }
 		}
 
 

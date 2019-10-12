@@ -102,7 +102,10 @@ Pre build v0.19. Creating a branch
 Thinking about how to find a cell. I'm considering the system of multioctree pointer structure with local search based
 on function that translates xyz-position to XZY-Cell_Id
 ...........................................................................................................................................[STATUS]
+11/10/2019
 
+Estoy muy perdido ahora mismo. Tengo que repasar todo
+Queda pendiente arregla un error en el calculo de las celdas de contorno. Hay un indice que esta corrido en el modulo de Y
 ...........................................................................................................................................[HOWFIX]
 
 ...........................................................................................................................................[NEWDAY]

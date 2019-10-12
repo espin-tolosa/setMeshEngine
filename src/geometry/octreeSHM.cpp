@@ -2,20 +2,48 @@
 #include "octreeSHM.h"
 #include <iostream>
 
-octreeSHM::octreeSHM() {
+octreeSHM::octreeSHM()
+ {
 
 //	std::cout<<"\n[CONSTRUCTOR]: Octree Mesh"<<std::endl;
+//si dejo esto asi deberia hacer estas variables virtuales para que pertenezca a la clase octree
+//actualmente se inicializan a cero y luego se cambian a 3 para cada octree
+}
 
+octreeSHM::octreeSHM(unsigned UpperLevel_Divided_Cells)
+ {
+
+//	std::cout<<"\n[CONSTRUCTOR]: Octree Mesh"<<std::endl;
+//si dejo esto asi deberia hacer estas variables virtuales para que pertenezca a la clase octree
+//actualmente se inicializan a cero y luego se cambian a 3 para cada octree
 	m_H  = 3;
 	m_W  = 3;
 	m_L  = 3;
 	m_HW = m_H*m_W;
+
+    Depth++;
+    std::cout << "Increased Depth of OctMesh to: " << octreeSHM::Depth << std::endl;
+
+	const int c_Ysweep{2}; //values of octree for one cell
+
+	m_Vertex_Population = (c_Ysweep+1)*m_H*m_W 		* UpperLevel_Divided_Cells;
+	m_Volume_Population = (m_H-1)*(m_W-1)*c_Ysweep	* UpperLevel_Divided_Cells;
+
+	Mesh           = new vec3[m_Vertex_Population];
+	Cell_Centroids = new vec3[m_Volume_Population];
+	Cell_Divided   = new bool[m_Volume_Population]{false};
+	Face_UNormals  = new vec3[m_Volume_Population*6]; //each cube has six normals, not using share optimiz.
+	Face_Centroids = new vec3[m_Volume_Population*6];
+	vTable         = new unsigned[m_Vertex_Population];
+    Root_Cell      = new unsigned[m_Volume_Population];
 }
 
 octreeSHM::~octreeSHM() {
 
 //	std::cout<<"\n[DESTRUCTOR]: Octree Mesh"<<std::endl;
 	delete[] vTable;
+    Depth--;
+    std::cout << "Decreased Depth of OctMesh to: " << octreeSHM::Depth << std::endl;
 }
 
 
@@ -39,13 +67,13 @@ void octreeSHM::loadVertexId(const unsigned &id) {
 		//Mapp of local vertex enum		global possition XYZ in a dimensional global frame reference
 		//ESTE TAMBIEN HAY QUE ARREGLARLO PORQUE ESTE MAPEADO SOLO SIRVE PARA LA MALLA DE LEVEL0 LOS DEMAS LEVEL TIENEN OTRO MAPEADO
 		this->Vertex[0] = &Mesh[i];		//(0 0 0)
-    		this->Vertex[1] = &Mesh[i+1];		//(1 0 0)
-    		this->Vertex[2] = &Mesh[i+1+m_W];	//(1 0 1)
-    		this->Vertex[3] = &Mesh[i+m_W];		//(0 0 1)
-    		this->Vertex[4] = &Mesh[i+m_HW];		//(0 1 0)
-    		this->Vertex[5] = &Mesh[i+1+m_HW];	//(1 1 0)
-    		this->Vertex[6] = &Mesh[i+1+m_W+m_HW];	//(1 1 1)
-    		this->Vertex[7] = &Mesh[i+m_W+m_HW];	//(0 1 1)
+   		this->Vertex[1] = &Mesh[i+1];		//(1 0 0)
+   		this->Vertex[2] = &Mesh[i+1+m_W];	//(1 0 1)
+   		this->Vertex[3] = &Mesh[i+m_W];		//(0 0 1)
+   		this->Vertex[4] = &Mesh[i+m_HW];		//(0 1 0)
+   		this->Vertex[5] = &Mesh[i+1+m_HW];	//(1 1 0)
+   		this->Vertex[6] = &Mesh[i+1+m_W+m_HW];	//(1 1 1)
+   		this->Vertex[7] = &Mesh[i+m_W+m_HW];	//(0 1 1)
 	//OBS: los centroides no estan optimiz y de momento no comparten info asi el indice no hay que procesarlo como para los vertex
 	}
     
@@ -72,13 +100,13 @@ void octreeSHM::loadVertexId(const unsigned &id, int octreeLevel) {
 		//Mapp of local vertex enum		global possition XYZ in a dimensional global frame reference
 		//ESTE TAMBIEN HAY QUE ARREGLARLO PORQUE ESTE MAPEADO SOLO SIRVE PARA LA MALLA DE LEVEL0 LOS DEMAS LEVEL TIENEN OTRO MAPEADO
 		this->Vertex[0] = &Mesh[i];		//(0 0 0)
-    		this->Vertex[1] = &Mesh[i+1];		//(1 0 0)
-    		this->Vertex[2] = &Mesh[i+1+m_W];	//(1 0 1)
-    		this->Vertex[3] = &Mesh[i+m_W];		//(0 0 1)
-    		this->Vertex[4] = &Mesh[i+m_HW];		//(0 1 0)
-    		this->Vertex[5] = &Mesh[i+1+m_HW];	//(1 1 0)
-    		this->Vertex[6] = &Mesh[i+1+m_W+m_HW];	//(1 1 1)
-    		this->Vertex[7] = &Mesh[i+m_W+m_HW];	//(0 1 1)
+    	this->Vertex[1] = &Mesh[i+1];		//(1 0 0)
+    	this->Vertex[2] = &Mesh[i+1+m_W];	//(1 0 1)
+    	this->Vertex[3] = &Mesh[i+m_W];		//(0 0 1)
+    	this->Vertex[4] = &Mesh[i+m_HW];		//(0 1 0)
+    	this->Vertex[5] = &Mesh[i+1+m_HW];	//(1 1 0)
+    	this->Vertex[6] = &Mesh[i+1+m_W+m_HW];	//(1 1 1)
+    	this->Vertex[7] = &Mesh[i+m_W+m_HW];	//(0 1 1)
 	//OBS: los centroides no estan optimiz y de momento no comparten info asi el indice no hay que procesarlo como para los vertex
 	}
     
@@ -91,27 +119,16 @@ void octreeSHM::setHexMeshElement(structuredHexMesh& MeshUP) {
 	//if octree is not already created then create one
 	if(!Mesh) {
 
-	const int c_Ysweep{2}; //values of octree for one cell
-
-	m_Vertex_Population = (c_Ysweep+1)*m_H*m_W	* MeshUP.Total_Cell_Divided;
-	m_Volume_Population = (m_H-1)*(m_W-1)*c_Ysweep	* MeshUP.Total_Cell_Divided;
-
-	Mesh           = new vec3[m_Vertex_Population];
-	Cell_Centroids = new vec3[m_Volume_Population];
-	Cell_Divided   = new bool[m_Volume_Population]{false};
-	Face_UNormals  = new vec3[m_Volume_Population*6]; //each cube has six normals, not using share optimiz.
-	Face_Centroids = new vec3[m_Volume_Population*6];
-	vTable         = new unsigned[m_Vertex_Population];
-
 	//std::cout<<"[OCTREE] POPULATION: "<<m_Volume_Population<<std::endl;
 	int this_cell_is_divided{0}, layer{0};
 	for(unsigned j =0; j<MeshUP.Log_Cells_Max(); j++) {
 
 		if(MeshUP.Cell_Divided[j]) {
 		
+            Root_Cell[this_cell_is_divided] = j; //esto direcciona a la capa de arriba pero es una mierda
+
 			layer = (this_cell_is_divided++)*9*3;
 			MeshUP.loadVertexId(j);
-
 			//NEW LEFT
 			//dereference operator gives the actual coordinates in *MeshUP.Vertex[N]	
 			Mesh[layer+0]  = *MeshUP.Vertex[0];
@@ -154,18 +171,6 @@ void octreeSHM::setHexMeshElement(octreeSHM& MeshUP) {
 
 	//if octree is not already created then create one
 	if(!Mesh) {
-
-	const int c_Ysweep{2}; //values of octree for one cell
-
-	m_Vertex_Population = (c_Ysweep+1)*m_H*m_W 		* MeshUP.Total_Cell_Divided;
-	m_Volume_Population = (m_H-1)*(m_W-1)*c_Ysweep	* MeshUP.Total_Cell_Divided;
-
-	Mesh           = new vec3[m_Vertex_Population];
-	Cell_Centroids = new vec3[m_Volume_Population];
-	Cell_Divided   = new bool[m_Volume_Population]{false};
-	Face_UNormals  = new vec3[m_Volume_Population*6]; //each cube has six normals, not using share optimiz.
-	Face_Centroids = new vec3[m_Volume_Population*6];
-	vTable         = new unsigned[m_Vertex_Population];
 
 	//std::cout<<"[OCTREE] POPULATION: "<<m_Volume_Population<<std::endl;
 	int this_cell_is_divided{0}, layer{0};
@@ -225,4 +230,9 @@ void octreeSHM::arrayInnerCompareTwo(const int Array[], const int& sizeArray) {
 			std::cout<<"Comparing: Array["<<i<<"] = "<<i<<" with Array["<<j<<"]"<<j<<std::endl;
   		}
  	}
+}
+
+unsigned octreeSHM::giveLowerLevelID()
+{
+    return (octreeSHM::Depth - 1);
 }

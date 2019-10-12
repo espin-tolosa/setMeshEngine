@@ -26,6 +26,7 @@ class structuredHexMesh : public vec3
     public:
 
     vec3* Mesh;
+    bool* Boundary_Cell;
     vec3* Cell_Centroids;
     bool* Cell_Divided;
     vec3* Face_UNormals;

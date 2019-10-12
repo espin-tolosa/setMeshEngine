@@ -3,12 +3,15 @@
 //#include <vtkXMLUnstructuredGrid.h>
 //#include <GL/glew.h>
 
+
 bool Log_Status   = true;
-bool Write_Mesh   = false;
+bool Write_Mesh   = true;
 bool Write_Octree = false;
-bool Write_Vec3   = false;
+bool Write_Vec3   = true;
 
 bool old = true;
+
+unsigned octreeSHM::Depth = 1; //reserved level 0 for root mesh
 
 int main()
 {
@@ -16,7 +19,9 @@ int main()
 	float VIEW_ROTX = 0;
 	float VIEW_ROTZ = 0;
 
-	int NEL = 10;
+    int MAX_DEPTH = 17;
+
+	int NEL = 1000;
 	int t=0;
 	int tfin = 10;
 
@@ -39,7 +44,7 @@ int main()
 	    int vertexNEL = sizeof(Surface)/sizeof(vec3);
 	    //Surface[0].ArithmeticForEach(Surface, NEL_X*NEL_Z , vec3(0.0, 0.0, 2.0), 1);
 
-		MyCube.SweepFace(Surface, NEL_X, NEL_Z, NEL, 0.0016*2.0*PI/(float) NEL, vec3(-100.0,0.0,0.0));
+		MyCube.SweepFace(Surface, NEL_X, NEL_Z, NEL, 0.016*2.0*PI/(float) NEL, vec3(-100.0,0.0,0.0));
 	
 		//This command compute cell centers of all cells for the mesh
 		for(int i=0; i< (int)MyCube.Log_Cells_Max(); i++) {
@@ -59,15 +64,19 @@ int main()
 //  double num_randomX = dRandom(lowerX, upperX);
 //  double num_randomY = dRandom(lowerY, upperY);
 //  double num_randomZ = dRandom(lowerZ, upperZ);
+        
+    vec3 Item[100];
 
-    vec3 Item[10000];
-
-    for(int i=0; i<10000; i++)
+    for(int i=0; i<100; i++)
     {
         Item[i] = vec3(dRandom(lowerX,upperX), dRandom(lowerY,upperY), dRandom(lowerZ,upperZ) );
     }
 
 	int number_of_points = sizeof(Item)/sizeof(vec3);
+
+
+   octreeSHM* OctreeLevel[MAX_DEPTH+1]{nullptr};
+//   OctreeLevel[0] = (octreeSHM)&MyCube;
 
 //Main loop to run the algorithm. It takes the cloud of points and compute
 //what cell of the mesh they belong to slit this cell in octree recursively
@@ -88,109 +97,6 @@ while(t++<tfin) {
             *(MyCube.Cell_Divided+i) = false;
 		}
 	}
-/*
-	//[Info] Buscando en MyCube los puntos insertados	
-	bool Item_inserted[number_of_points]={false};
-	for(unsigned id=0; id < MyCube.Log_Cells_Max(); id++) {
-
-		MyCube.loadVertexId(id);
-
-		for(int j=0; j<number_of_points; j++) {
-
-			if(!Item_inserted[j]) {
-
-				if(!MyCube.Cell_Divided[id]) {
-
-					if(MyCube.vertexSearchCell(Item[j])) {
-
-						Item_inserted[j] = true;
-					}
-				}
-			}
-		}
-	}
-
-	//[Info] Creating Octree level 1
-	if(MyCube.Total_Cell_Divided) {
-	octreeSHM* Octree_1 = new octreeSHM;
-	Octree_1->setHexMeshElement(MyCube);
-
-	//[Info] Buscando en Octree1 los puntos insertados
-	bool Item_inserted[number_of_points]={false};
-
-	for(int k=0; k<(int)Octree_1->Log_Cells_Max(); k++) {
-
-		for(int j=0; j<number_of_points; j++) {
-
-			if(!Item_inserted[j]) {
-
-				if(!Octree_1->Cell_Divided[k]) {
-
-					Octree_1->loadVertexId((unsigned) k, 1);
-					Octree_1->CenterC8();
-
-					if(Octree_1->vertexSearchCell(Item[j])) {
-						Item_inserted[j] = true;
-					}
-				}
-			}
-		}
-	}
-
-    //[Info] Creating Octree level 2
-	if(Octree_1->Total_Cell_Divided) {
-	octreeSHM* Octree_2 = new octreeSHM;
-	Octree_2->setHexMeshElement(*Octree_1);
-
-	//[Info] Buscando en Octree1 los puntos insertados
-	bool Item_inserted[number_of_points]={false};
-
-	for(int k=0; k<(int)Octree_2->Log_Cells_Max(); k++) {
-
-		for(int j=0; j<number_of_points; j++) {
-
-			if(!Item_inserted[j]) {
-
-				if(!Octree_2->Cell_Divided[k]) {
-
-					Octree_2->loadVertexId((unsigned) k, 1);
-					Octree_2->CenterC8();
-
-					if(Octree_2->vertexSearchCell(Item[j])) {
-						Item_inserted[j] = true;
-					}
-				}
-			}
-		}
-	}
-
-    //[Info] Creating Octree level 3
-	if(Octree_2->Total_Cell_Divided) {
-	octreeSHM* Octree_3 = new octreeSHM;
-	Octree_3->setHexMeshElement(*Octree_2);
-
-	//[Info] Buscando en Octree1 los puntos insertados
-	bool Item_inserted[number_of_points]={false};
-
-	for(int k=0; k<(int)Octree_3->Log_Cells_Max(); k++) {
-
-		for(int j=0; j<number_of_points; j++) {
-
-			if(!Item_inserted[j]) {
-
-				if(!Octree_3->Cell_Divided[k]) {
-
-					Octree_3->loadVertexId((unsigned) k, 1);
-					Octree_3->CenterC8();
-
-					if(Octree_3->vertexSearchCell(Item[j])) {
-						Item_inserted[j] = true;
-					}
-				}
-			}
-		}
-	}
-*/
 
 	//[Info] Buscando en MyCube los puntos insertados	
 	bool Item_inserted[number_of_points]={false};
@@ -203,7 +109,7 @@ while(t++<tfin) {
 
 				if(!MyCube.Cell_Divided[id]) {
 
-std::cout<<"Buscando el punto: " << j << " en el Cubo"<<"Celda: "<< id << std::endl;
+//std::cout<<"Buscando el punto: " << j << " en el Cubo"<<"Celda: "<< id << std::endl;
 		            MyCube.loadVertexId(id);
 					if(MyCube.vertexSearchCell(Item[j])) {
 						Item_inserted[j] = true;
@@ -213,118 +119,95 @@ std::cout<<"Buscando el punto: " << j << " en el Cubo"<<"Celda: "<< id << std::e
 		}
 	}
 
+    unsigned thisOctLevel;
+
 	//[Info] Creating Octree level 1
+
+    thisOctLevel = octreeSHM::Depth;
 	if(MyCube.Total_Cell_Divided) {
-	octreeSHM* Octree_1 = new octreeSHM;
-	Octree_1->setHexMeshElement(MyCube);
+
+	OctreeLevel[thisOctLevel] = new octreeSHM(MyCube.Total_Cell_Divided);
+
+	OctreeLevel[thisOctLevel]->setHexMeshElement(MyCube);
 
 	//[Info] Buscando en Octree1 los puntos insertados
 	bool Item_inserted[number_of_points]={false};
 
-	for(int k=0; k<(int)Octree_1->Log_Cells_Max(); k++) {
-    if(Octree_1->Total_Cell_Divided == Octree_1->Log_Cells_Max()) break;
+	for(int k=0; k<(int)OctreeLevel[thisOctLevel]->Log_Cells_Max(); k++) {
+    if(OctreeLevel[thisOctLevel]->Total_Cell_Divided == OctreeLevel[thisOctLevel]->Log_Cells_Max()) break;
 		for(int j=0; j<number_of_points; j++) {
 
 			if(!Item_inserted[j]) {
 
-				if(!Octree_1->Cell_Divided[k]) {
+				if(!OctreeLevel[thisOctLevel]->Cell_Divided[k]) {
 
-					Octree_1->loadVertexId((unsigned) k, 1);
-					Octree_1->CenterC8();
+					OctreeLevel[thisOctLevel]->loadVertexId((unsigned) k, 1);
+					OctreeLevel[thisOctLevel]->CenterC8();
 
-std::cout<<"Buscando el punto: " << j << " en Octree 1"<<"Celda: "<< k <<std::endl;
-					if(Octree_1->vertexSearchCell(Item[j])) {
+//std::cout<<"Buscando el punto: " << j << " en Octree 1"<<"Celda: "<< k <<std::endl;
+					if(OctreeLevel[thisOctLevel]->vertexSearchCell(Item[j])) {
 						Item_inserted[j] = true;
 					}
 				}
 			}
 		}
     }
+    }//I want to avoid Nested Invoking Classes
 
-    //[Info] Creating Octree level 2
-	if(Octree_1->Total_Cell_Divided) {
-	octreeSHM* Octree_2 = new octreeSHM;
-	Octree_2->setHexMeshElement(*Octree_1);
+//WHILE LOOP TO CREATE OCTREE MESH
+while(octreeSHM::Depth < MAX_DEPTH+1)
+{
+	//[Info] Creating Octree level 1
+
+    thisOctLevel = octreeSHM::Depth;
+    unsigned cells_divided = OctreeLevel[octreeSHM::giveLowerLevelID()]->Total_Cell_Divided;
+
+	if(cells_divided) {
+	OctreeLevel[thisOctLevel] = new octreeSHM(cells_divided);
+
+	OctreeLevel[thisOctLevel]->setHexMeshElement(*OctreeLevel[octreeSHM::giveLowerLevelID()]);
 
 	//[Info] Buscando en Octree1 los puntos insertados
 	bool Item_inserted[number_of_points]={false};
 
-	for(int k=0; k<(int)Octree_2->Log_Cells_Max(); k++) {
-    if(Octree_2->Total_Cell_Divided == Octree_2->Log_Cells_Max()) break;
+	for(int k=0; k<(int)OctreeLevel[thisOctLevel]->Log_Cells_Max(); k++) {
+    if(OctreeLevel[thisOctLevel]->Total_Cell_Divided == OctreeLevel[thisOctLevel]->Log_Cells_Max()) break;
 		for(int j=0; j<number_of_points; j++) {
 
 			if(!Item_inserted[j]) {
 
-				if(!Octree_2->Cell_Divided[k]) {
+				if(!OctreeLevel[thisOctLevel]->Cell_Divided[k]) {
 
-					Octree_2->loadVertexId((unsigned) k, 1);
-					Octree_2->CenterC8();
+					OctreeLevel[thisOctLevel]->loadVertexId((unsigned) k, 1);
+					OctreeLevel[thisOctLevel]->CenterC8();
 
-std::cout<<"Buscando el punto: " << j << " en Octree 2"<<"Celda: "<< k <<std::endl;
-					if(Octree_2->vertexSearchCell(Item[j])) {
+					if(OctreeLevel[thisOctLevel]->vertexSearchCell(Item[j])) {
 						Item_inserted[j] = true;
 					}
 				}
 			}
 		}
-	}
-
-    //[Info] Creating Octree level 3
-	if(Octree_2->Total_Cell_Divided) {
-	octreeSHM* Octree_3 = new octreeSHM;
-	Octree_3->setHexMeshElement(*Octree_2);
-
-	//[Info] Buscando en Octree1 los puntos insertados
-	bool Item_inserted[number_of_points]={false};
-
-	for(int k=0; k<(int)Octree_3->Log_Cells_Max(); k++) {
-    if(Octree_3->Total_Cell_Divided == Octree_3->Log_Cells_Max()) break;
-		for(int j=0; j<number_of_points; j++) {
-
-			if(!Item_inserted[j]) {
-
-				if(!Octree_3->Cell_Divided[k]) {
-
-					Octree_3->loadVertexId((unsigned) k, 1);
-					Octree_3->CenterC8();
-
-std::cout<<"Buscando el punto: " << j << " en Octree 3"<<"Celda: "<< k <<std::endl;
-					if(Octree_3->vertexSearchCell(Item[j])) {
-						Item_inserted[j] = true;
-					}
-				}
-			}
-		}
-	}
-
-
-	int cells_added =   Octree_1 -> Log_Cells_Max() +
-		                Octree_2 -> Log_Cells_Max() +
-		                Octree_3 -> Log_Cells_Max() ;
-
-
-    if(Log_Status)	std::cout<<"DELETING OCTREES 3: "<< Octree_3->Log_Cells_Max() << std::endl;
-    if(Write_Octree) Octree_3->WriteMesh(&meshFileOF, nameFile, 3);
-
-	delete Octree_3;
-}
-    if(Log_Status)	std::cout<<"DELETING OCTREES 2: "<< Octree_2->Log_Cells_Max() << std::endl;
-    if(Write_Octree) Octree_2->WriteMesh(&meshFileOF, nameFile, 2);
-
-	delete Octree_2;
+    }
+    }//I want to avoid Nested Invoking Classes
 }
 
-    if(Log_Status) std::cout<<"DELETING OCTREES 1: "<< Octree_1->Log_Cells_Max() << std::endl;
-    if(Write_Octree) Octree_1->WriteMesh(&meshFileOF, nameFile, 1);
+	int cells_added{0};
+    for (int i = (int)octreeSHM::giveLowerLevelID(); i>0; i--) {
 
-	delete Octree_1;
-}
+       	cells_added += OctreeLevel[i] -> Log_Cells_Max();
 
-    if(Log_Status) std::cout<<"TIME-STAMP: "<<t<<"/"<<tfin<<std::endl;
+        if(Write_Octree) OctreeLevel[i]->WriteMesh(&meshFileOF, nameFile, 2);
+
+        delete OctreeLevel[i];
+        OctreeLevel[i] = nullptr;
+    }
+
+
+    if(Log_Status) std::cout<<"TIME-STAMP: "<<t<<"/"<<tfin<<"\nCells Added: " << cells_added << std::endl;
     if(Write_Mesh) MyCube.WriteMesh(&meshFileOF, nameFile, 0);
 
     if(Write_Vec3){
-        #include "issues/WriteVec3.h"
+    #include "issues/WriteVec3.h"
     }
 }
 

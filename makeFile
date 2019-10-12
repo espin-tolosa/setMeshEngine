@@ -1,14 +1,37 @@
 #!/bin/bash
+echo "--------------------------"
+echo "Compiling setMEshEngine..."
+echo "--------------------------"
+echo "Autor: Samuel Espin Tolosa"
 
-rm temp/*
 
+rm -f temp/*
+
+echo "Compiling sources of core engine"
+echo "--------------------------------"
+
+echo "Compiling src/functions"
 g++ -c src/functions/*.cpp
+
+echo "Compiling src/geometry/structuredHexMesh"
 g++ -c src/geometry/structuredHexMesh.cpp
+
+echo "Compiling src/geometry/octreeSHM"
 g++ -c src/geometry/octreeSHM.cpp
+
+echo "Compiling src/logs"
 g++ -c src/logs/*.cpp
+
+#echo "Compiling src/functions"
 #g++ -c src/materials/*.cpp
+
+echo "Compiling src/maths"
 g++ -c src/maths/*.cpp
+
+#echo "Compiling src/functions"
 #g++ -c src/phase/*.cpp
+
+echo "Compiling main"
 g++ -c main.cpp
 
 g++ -std=c++11 -o main main.o setfun.o structuredHexMesh.o octreeSHM.o log.o vec3.o vec3operations.o 
