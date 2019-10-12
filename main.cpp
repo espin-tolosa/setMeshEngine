@@ -16,14 +16,12 @@ unsigned octreeSHM::Depth = 1; //reserved level 0 for root mesh
 int main()
 {
 
-	float VIEW_ROTX = 0;
-	float VIEW_ROTZ = 0;
-
+    float VIEW_ROTX = 0;
+    float VIEW_ROTZ = 0;
     int MAX_DEPTH = 17;
-
-	int NEL = 1000;
-	int t=0;
-	int tfin = 10;
+    int NEL = 1000;
+    int t=0;
+    int tfin = 10;
 
 	structuredHexMesh MyCube;
 
@@ -49,8 +47,8 @@ int main()
 		//This command compute cell centers of all cells for the mesh
 		for(int i=0; i< (int)MyCube.Log_Cells_Max(); i++) {
 
-			MyCube.loadVertexId((unsigned) i);
-			MyCube.CenterC8();
+            MyCube.loadVertexId((unsigned) i);
+            MyCube.CenterC8();
             MyCube.Log_Cell();
 		}
 
@@ -101,22 +99,22 @@ while(t++<tfin) {
 	//[Info] Buscando en MyCube los puntos insertados	
 	bool Item_inserted[number_of_points]={false};
 	for(unsigned id=0; id < MyCube.Log_Cells_Max(); id++) {
-    if(MyCube.Total_Cell_Divided == MyCube.Log_Cells_Max()) break;
 
-		for(int j=0; j<number_of_points; j++) {
+        if(MyCube.Total_Cell_Divided == MyCube.Log_Cells_Max()) break;
 
-			if(!Item_inserted[j]) {
+            for(int j=0; j<number_of_points; j++) {
 
-				if(!MyCube.Cell_Divided[id]) {
+                if(!Item_inserted[j]) {
 
-//std::cout<<"Buscando el punto: " << j << " en el Cubo"<<"Celda: "<< id << std::endl;
-		            MyCube.loadVertexId(id);
-					if(MyCube.vertexSearchCell(Item[j])) {
+                    if(!MyCube.Cell_Divided[id]) {
+
+                        MyCube.loadVertexId(id);
+                        if(MyCube.vertexSearchCell(Item[j])) {
 						Item_inserted[j] = true;
-					}
-				}
-			}
-		}
+					    }
+				    }
+			    }
+            }
 	}
 
     unsigned thisOctLevel;
