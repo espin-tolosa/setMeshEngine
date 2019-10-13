@@ -1,7 +1,7 @@
 #!/bin/bash
 
-brand="v0.19"
-version=($brand "refresh_v0.18" "v0.19")
+brand="v0.20"
+version=($brand "refresh_v0.18" "v0.19" "v0.20")
 
 echo "Small Script to add all modified files, commit and push"
 

@@ -5,11 +5,11 @@
 class octreeSHM : public structuredHexMesh
 {
 	private:
-	unsigned* vTable;
+	std::vector<unsigned> vTable;
 
 	public:
 
-    unsigned* Root_Cell;
+    std::vector<unsigned> Root_Cell;
     static unsigned Depth;
 
 	octreeSHM();
