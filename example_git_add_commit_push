@@ -1,0 +1,17 @@
+#!/bin/bash
+
+brand="v0.20"
+version=($brand "refresh_v0.18" "v0.19" "v0.20")
+
+echo "Small Script to add all modified files, commit and push"
+
+echo "Adding modified files..."
+git add -u
+
+echo "Commit: $1"
+git commit -m export $1
+
+echo "Push Version: ${version[$2]}"
+git push origin ${version[$2]}
+
+#git ls-files | xargs wc -l

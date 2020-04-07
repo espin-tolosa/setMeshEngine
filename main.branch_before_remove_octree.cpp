@@ -73,7 +73,7 @@ int main()
 	int number_of_points = sizeof(Item)/sizeof(vec3);
 
 
-//   octreeSHM* OctreeLevel[MAX_DEPTH+1]{nullptr};
+   octreeSHM* OctreeLevel[MAX_DEPTH+1]{nullptr};
 //   OctreeLevel[0] = (octreeSHM)&MyCube;
 
 //Main loop to run the algorithm. It takes the cloud of points and compute
@@ -92,7 +92,7 @@ while(t++<tfin) {
         MyCube.Total_Cell_Divided = 0;
 		for(int i=0; (unsigned) i<MyCube.Log_Cells_Max(); i++) {
 	        
-            MyCube.Cell_Divided[i] = false;
+            *(MyCube.Cell_Divided+i) = false;
 		}
 	}
 
@@ -117,8 +117,8 @@ while(t++<tfin) {
             }
 	}
 
-//    unsigned thisOctLevel;
-/*
+    unsigned thisOctLevel;
+
 	//[Info] Creating Octree level 1
 
     thisOctLevel = octreeSHM::Depth;
@@ -199,9 +199,9 @@ while(octreeSHM::Depth < MAX_DEPTH+1)
         delete OctreeLevel[i];
         OctreeLevel[i] = nullptr;
     }
-*/
 
-    if(Log_Status) std::cout<<"TIME-STAMP: "<<t<<"/"<<tfin<<"\nCells Added: " << std::endl;
+
+    if(Log_Status) std::cout<<"TIME-STAMP: "<<t<<"/"<<tfin<<"\nCells Added: " << cells_added << std::endl;
     if(Write_Mesh) MyCube.WriteMesh(&meshFileOF, nameFile, 0);
 
     if(Write_Vec3){

@@ -52,24 +52,50 @@
 
 structuredHexMesh::structuredHexMesh()
 
-    :   m_H(0), m_W(0), m_L(0), m_HW(0),
+/*    :   m_H(0), m_W(0), m_L(0), m_HW(0),
         m_Vertex_Population(0), m_Face_Population(0), m_Volume_Population(0), m_id(0),
         m_Total_Volume(0.0), m_cell_Volume(0.0),
-        Mesh(), Cell_Centroids(), Cell_Divided(), Vertex(), Edge_i(), Edge_j(), Tris(), Quad(),
+        Mesh(), Cell_Centroids(), Cell_Divided(),
+        Face_UNormals(), Face_Centroids(), Boundary_Cell(),
+        Vertex(), Edge_i(), Edge_j(), Tris(), Quad(),
 		Total_Cell_Divided(0)
-
-        {
+*/        {
 //            std::cout<<"\n[CONSTRUCTOR]: Structured Mesh\n"<<std::endl;
+        }
+
+structuredHexMesh::structuredHexMesh(unsigned UpperLevel_Divided_Cells)
+
+    :   m_H(3), m_W(3), m_L(3), m_HW(3*3),
+        m_Vertex_Population(3*3*3*UpperLevel_Divided_Cells),
+        m_Volume_Population((3-1)*(3-1)*(3-1)*UpperLevel_Divided_Cells),
+        Mesh(m_L*m_H*m_W*UpperLevel_Divided_Cells),
+        Cell_Centroids((3-1)*(3-1)*(3-1)*UpperLevel_Divided_Cells),
+        Cell_Divided((3-1)*(3-1)*(3-1)*UpperLevel_Divided_Cells, false),
+        Face_UNormals((3-1)*(3-1)*(3-1)*UpperLevel_Divided_Cells*6),
+        Face_Centroids((3-1)*(3-1)*(3-1)*UpperLevel_Divided_Cells*6),
+        Boundary_Cell((3-1)*(3-1)*(3-1)*UpperLevel_Divided_Cells, false)
+    {}
+
+structuredHexMesh::structuredHexMesh(unsigned nel_TSx, unsigned nel_TSy, unsigned nel_TSz)
+
+    :   m_H(nel_TSz), m_W(nel_TSx), m_L(nel_TSy),
+        m_Vertex_Population(nel_TSz*nel_TSx*nel_TSy), m_Face_Population(0), m_Volume_Population((nel_TSz-1)*(nel_TSx-1)*(nel_TSy-1)),
+        m_id(0), m_Total_Volume(0.0), m_cell_Volume(0.0),
+        Mesh(nel_TSz*nel_TSx*nel_TSy),
+        Cell_Centroids((nel_TSz-1)*(nel_TSx-1)*(nel_TSy-1)),
+        Cell_Divided((nel_TSz-1)*(nel_TSx-1)*(nel_TSy-1), false),
+        Face_UNormals((nel_TSz-1)*(nel_TSx-1)*(nel_TSy-1)*6),
+        Face_Centroids((nel_TSz-1)*(nel_TSx-1)*(nel_TSy-1)*6),
+        Boundary_Cell((nel_TSz-1)*(nel_TSx-1)*(nel_TSy-1),false),
+        Vertex(), Edge_i(), Edge_j(), Tris(), Quad(),
+		Total_Cell_Divided(0)
+        {
+		    m_HW = m_H*m_W;
         }
 
 structuredHexMesh::~structuredHexMesh()
     {
 //      std::cout<<"[DESTRUCTOR]: Structured Mesh"<<std::endl;
-        delete[] Mesh;
-        delete[] Cell_Centroids;
-	delete[] Cell_Divided;
-	delete[] Face_UNormals;
-	delete[] Face_Centroids;
 
 //	delete[] u;
 //	delete[] r;
@@ -198,6 +224,7 @@ structuredHexMesh::~structuredHexMesh()
             vec3 v5 = *Vertex[5];
             vec3 v6 = *Vertex[6];
             vec3 v7 = *Vertex[7];
+
 
 	    //reset any carried value of Total Volume for cases of recursively calling CenterC8
 	    m_Total_Volume = 0.;
@@ -351,19 +378,6 @@ structuredHexMesh::~structuredHexMesh()
 	    Cell_Centroids[m_id] = centerS;
 }
 
-void structuredHexMesh::AllocateMesh()
-{
-	Mesh           = new vec3[m_Vertex_Population];
-	Cell_Centroids = new vec3[m_Volume_Population];
-	Cell_Divided   = new bool[m_Volume_Population]{false};
-	Face_UNormals  = new vec3[m_Volume_Population*6]; //each cube has six normals, not using face-share optimiz.
-	Face_Centroids = new vec3[m_Volume_Population*6];
-//	u = new double[m_Volume_Population]{0.0};
-//	r = new double[m_Volume_Population]{0.0};
-//	T = new double[m_Volume_Population]{0.0};
-//	p = new double[m_Volume_Population]{0.0};
-}
-
 
 /*---------------------------------------------------------
  * proc SweepFace
@@ -391,20 +405,12 @@ void structuredHexMesh::AllocateMesh()
  * ------------------------------------------------------*/
 void structuredHexMesh::SweepFace(const vec3* Surface, const int& nel_TSx, const int& nel_TSz, const int& nel_Sweep, const double& delta_Sweep, const vec3& Origin_Sweep)
 {
-    if(Mesh==0)
-    {
-        m_H  = nel_TSz;
-		m_W  = nel_TSx;
-		m_HW = m_H*m_W;
-
-		m_Vertex_Population = (nel_Sweep + 1) * m_H*m_W   ;
-        m_Volume_Population =  nel_Sweep * (m_H-1)*(m_W-1);
-
-		structuredHexMesh::AllocateMesh();
-
+//    if(Mesh==0)
+//    {
 		for(int i=0; i<m_H*m_W; i++) {
 
 			Mesh[i] = *(Surface++);
+            std::cout << "Mesh element" << Mesh[i] << std::endl;
 			for (int j = 0; j < nel_Sweep; j++) {
 	
 				Mesh[i+(j+1)*m_H*m_W] = vec3::Loc2Glob(vec3::RotZ(vec3::Glob2Loc(Mesh[i],Origin_Sweep),(j+1)*delta_Sweep), Origin_Sweep);
@@ -414,11 +420,11 @@ void structuredHexMesh::SweepFace(const vec3* Surface, const int& nel_TSx, const
 		std::cout<<"[SWEEP] POPULATION: "<<m_Volume_Population<<std::endl;
    	}
 
-    else
-    {
-        std::cout<<"Mesh has been already created"<<std::endl;
-    }
-}
+//    else
+//    {
+//        std::cout<<"Mesh has been already created"<<std::endl;
+//    }
+//}
 
 /*---------------------------------------------------------
  * proc vectexSearchCell
@@ -499,6 +505,47 @@ void structuredHexMesh::Log() const
     }
 }
 
+void structuredHexMesh::Log_Cell()
+{
+//assuming we want to load cell id
+    unsigned IDX{0};
+    unsigned IDY{0};
+    unsigned IDZ{0};
+
+//    std::cout << "Array Coordinates (ID-XZY) of Cell ID: " << m_id << std::endl;
+//    std::cout << "--------------------------------------------" << std::endl;
+
+    IDX = m_id % (m_H-1);
+    IDZ = (m_id / (m_H-1)) % (m_W-1); 
+    IDY = (m_id / ((m_H-1)*(m_W-1))) % (m_L-1);
+
+    if(IDX == 0)        {Boundary_Cell[(int)m_id] = true;}// "Wall at B-Face"
+    if(IDZ == 0)        {Boundary_Cell[(int)m_id] = true;}// "Wall at S-Face"
+    if(IDY == 0)        {Boundary_Cell[(int)m_id] = true;}// "Wall at L-Face"
+    if(IDX == (m_H-2))  {Boundary_Cell[(int)m_id] = true;}// "Wall at F-Face"
+    if(IDZ == (m_W-2))  {Boundary_Cell[(int)m_id] = true;}// "Wall at N-Face"
+    if(IDY == (m_L-2))  {Boundary_Cell[(int)m_id] = true;}// "Wall at R-Face"
+
+//    std::cout<<"Check Bool: " << m_id <<" " << Boundary_Cell[m_id] << std::endl;
+//    if(Boundary_Cell[m_id]) std::cout<< "Element is Wall Boundary Cell" << std::endl;
+
+
+    //here comes:
+    //Input: Item.(x,y,z) -> Cell_ID.(X, Y, Z)
+    //Based on geometric global parameters
+
+    //Cartesian
+    // IDX <- x/W
+    // IDY <- y/L
+    // IDZ <- z/H
+
+    //Cilindrical
+    // IDA <- atan(y/x)/alpha
+    // IDR <- sqrt(x*x + y*y)/W
+    // IDZ <- z/H
+
+}
+
 void structuredHexMesh::Log_Cells() const
 {
 //	std::cout<<"Vertex Coordinates of Node: "<< m_id << std::endl;
@@ -535,7 +582,9 @@ void structuredHexMesh::WriteMesh(std::ofstream *meshFileOF, std::string nameFil
 	{
 		for(int i = 0; i<this->Log_Verts(); i++)
 		{
+            if(Boundary_Cell[i]) {
 			*meshFileOF << this->Mesh[i]<<", "<<level<<std::endl;
+            }
 		}
 
 
