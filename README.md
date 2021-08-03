@@ -7,3 +7,5 @@ The project will have modular sections which could serve for different purposes,
 in verification and validation stages of the solver so until reach this point mesh engine will keep simple enought to run.
 
 Up to now, the repository was created to help me having a remote repository, so even being public access is under development.
+
+Working with worktrees at trunk
